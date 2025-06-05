@@ -32,7 +32,7 @@ def login():
         
         if user is None:
             error = 'CPF não encontrado.'
-        elif not check_password_hash(user['password'], senha):
+        elif not user['first_login'] and not check_password_hash(user['password'], senha):
             error = 'Senha incorreta.'
             
         if error is None:
@@ -45,7 +45,7 @@ def login():
             if user['first_login']:
                 return redirect(url_for('auth.change_password'))
                 
-            return redirect(url_for('tarefas.list_tasks'))
+            return redirect(url_for('familia.list_members'))
             
         flash(error)
         
@@ -60,9 +60,16 @@ def logout():
 @login_required
 def change_password():
     if request.method == 'POST':
-        senha_atual = request.form['senha_atual']
-        nova_senha = request.form['nova_senha']
-        confirma_senha = request.form['confirma_senha']
+        is_first_login = session.get('first_login', False)
+        
+        if not is_first_login:
+            senha_atual = request.form['current_password']
+            if not senha_atual:
+                flash('A senha atual é obrigatória.', 'error')
+                return render_template('auth/change_password.html')
+        
+        nova_senha = request.form['new_password']
+        confirma_senha = request.form['confirm_password']
         
         db = current_app.get_db()
         error = None
@@ -70,7 +77,7 @@ def change_password():
         user = db.execute('SELECT * FROM usuario WHERE id = ?', 
                          (session['user_id'],)).fetchone()
         
-        if not check_password_hash(user['password'], senha_atual):
+        if not is_first_login and not check_password_hash(user['password'], senha_atual):
             error = 'Senha atual incorreta.'
         elif nova_senha != confirma_senha:
             error = 'As novas senhas não coincidem.'
@@ -83,9 +90,15 @@ def change_password():
                 (generate_password_hash(nova_senha), session['user_id'])
             )
             db.commit()
-            flash('Senha alterada com sucesso!', 'success')
+            
+            if is_first_login:
+                session['first_login'] = False
+                flash('Senha alterada com sucesso! Bem-vindo ao sistema!', 'success')
+            else:
+                flash('Senha alterada com sucesso!', 'success')
+                
             return redirect(url_for('familia.list_members'))
             
         flash(error, 'error')
         
-    return redirect(url_for('familia.list_members')) 
+    return render_template('auth/change_password.html') 
