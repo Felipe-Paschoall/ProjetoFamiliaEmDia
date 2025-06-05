@@ -90,6 +90,11 @@ content %}
             <span class="badge bg-primary">Em andamento</span>
             {% elif tarefa.status == 'rejeitada' %}
             <span class="badge bg-danger">Rejeitada</span>
+            {% elif tarefa.status == 'atrasada' %}
+            <span class="badge bg-danger">
+              <i class="fas fa-clock me-1"></i>
+              Atrasada
+            </span>
             {% else %}
             <span class="badge bg-warning text-dark">Aguardando aprovação</span>
             {% endif %}
@@ -105,21 +110,19 @@ content %}
               >
                 <i class="fas fa-edit"></i>
               </a>
-              {% endif %} {% if tarefa.status == 'aprovada' and
-              tarefa.destinatario_id == session.get('user_id') %}
-              <form
-                method="POST"
-                action="{{ url_for('tarefas.complete_task', id=tarefa.id) }}"
-                class="d-inline"
+              {% endif %} {% if (tarefa.status == 'aprovada' or tarefa.status ==
+              'atrasada') and tarefa.destinatario_id == session.get('user_id')
+              %}
+              <button
+                type="button"
+                class="btn btn-success"
+                title="Marcar como concluída"
+                data-bs-toggle="modal"
+                data-bs-target="#completeModal{{ tarefa.id }}"
               >
-                <button
-                  type="submit"
-                  class="btn btn-success"
-                  title="Marcar como concluída"
-                >
-                  <i class="fas fa-check"></i>
-                </button>
-              </form>
+                <i class="fas fa-check"></i>
+              </button>
+
               <button
                 type="button"
                 class="btn btn-danger"
@@ -160,9 +163,79 @@ content %}
               {% endif %}
             </div>
 
+            <!-- Modal de Conclusão -->
+            {% if (tarefa.status == 'aprovada' or tarefa.status == 'atrasada')
+            and tarefa.destinatario_id == session.get('user_id') %}
+            <div
+              class="modal fade"
+              id="completeModal{{ tarefa.id }}"
+              tabindex="-1"
+            >
+              <div class="modal-dialog">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title">
+                      {% if tarefa.status == 'atrasada' %}
+                      <i class="fas fa-clock text-warning me-2"></i>
+                      Concluir Tarefa Atrasada {% else %}
+                      <i class="fas fa-check text-success me-2"></i>
+                      Concluir Tarefa {% endif %}
+                    </h5>
+                    <button
+                      type="button"
+                      class="btn-close"
+                      data-bs-dismiss="modal"
+                    ></button>
+                  </div>
+                  <form
+                    method="POST"
+                    action="{{ url_for('tarefas.complete_task', id=tarefa.id) }}"
+                  >
+                    <div class="modal-body">
+                      <p>
+                        {% if tarefa.status == 'atrasada' %} Você está
+                        concluindo uma tarefa atrasada: {% else %} Você está
+                        concluindo a tarefa: {% endif %}
+                        <strong>{{ tarefa.titulo }}</strong>
+                      </p>
+                      {% if tarefa.status == 'atrasada' %}
+                      <div class="mb-3">
+                        <label
+                          for="justificativa_atraso{{ tarefa.id }}"
+                          class="form-label"
+                        >
+                          Justificativa do Atraso
+                        </label>
+                        <textarea
+                          class="form-control"
+                          id="justificativa_atraso{{ tarefa.id }}"
+                          name="justificativa_atraso"
+                          rows="3"
+                          required
+                          placeholder="Por favor, explique o motivo do atraso..."
+                        ></textarea>
+                      </div>
+                      {% endif %}
+                    </div>
+                    <div class="modal-footer">
+                      <button
+                        type="button"
+                        class="btn btn-secondary"
+                        data-bs-dismiss="modal"
+                      >
+                        Cancelar
+                      </button>
+                      <button type="submit" class="btn btn-success">
+                        <i class="fas fa-check me-2"></i>
+                        Concluir Tarefa
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+
             <!-- Modal de Rejeição -->
-            {% if tarefa.status == 'aprovada' and tarefa.destinatario_id ==
-            session.get('user_id') %}
             <div
               class="modal fade"
               id="rejectModal{{ tarefa.id }}"

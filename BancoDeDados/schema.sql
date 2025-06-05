@@ -31,8 +31,8 @@ CREATE TABLE tarefa (
     destinatario_id INTEGER NOT NULL,
     titulo TEXT NOT NULL,
     descricao TEXT,
-    horario DATETIME,
-    status TEXT NOT NULL DEFAULT 'pendente',
+    horario DATETIME,  -- Formato: YYYY-MM-DD HH:MM:SS
+    status TEXT NOT NULL CHECK(status IN ('pendente', 'aprovada', 'rejeitada', 'atrasada', 'concluida')) DEFAULT 'pendente',
     justificativa TEXT,
     created_at TIMESTAMP NOT NULL DEFAULT (datetime('now', '-3 hours')),
     updated_at TIMESTAMP,

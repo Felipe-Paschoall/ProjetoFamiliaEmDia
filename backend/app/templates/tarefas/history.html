@@ -36,10 +36,11 @@ block content %}
           Pendentes
         </a>
         <a
-          href="{{ url_for('tarefas.history', status='ativas') }}"
-          class="btn btn-outline-primary {% if current_status == 'ativas' %}active{% endif %}"
+          href="{{ url_for('tarefas.history', status='atrasadas') }}"
+          class="btn btn-outline-danger {% if current_status == 'atrasadas' %}active{% endif %}"
         >
-          Ativas
+          <i class="fas fa-clock me-1"></i>
+          Atrasadas
         </a>
         <a
           href="{{ url_for('tarefas.history', status='rejeitadas') }}"
@@ -78,14 +79,19 @@ block content %}
             {% if tarefa.descricao %}
             <br />
             <small class="text-muted">{{ tarefa.descricao }}</small>
-            {% endif %} {% if tarefa.justificativa and tarefa.status ==
-            'rejeitada' %}
+            {% endif %} {% if tarefa.justificativa %}
             <br />
+            {% if tarefa.status == 'rejeitada' %}
             <small class="text-danger">
               <i class="fas fa-info-circle me-1"></i>
               Justificativa da rejeição: {{ tarefa.justificativa }}
             </small>
-            {% endif %}
+            {% elif tarefa.status == 'concluida' and tarefa.justificativa %}
+            <small class="text-warning">
+              <i class="fas fa-clock me-1"></i>
+              Justificativa do atraso: {{ tarefa.justificativa }}
+            </small>
+            {% endif %} {% endif %}
           </td>
           <td>{{ tarefa.criador_nome }}</td>
           <td>{{ tarefa.responsavel_nome }}</td>
@@ -101,6 +107,11 @@ block content %}
             <span class="badge bg-primary">Em andamento</span>
             {% elif tarefa.status == 'rejeitada' %}
             <span class="badge bg-danger">Rejeitada</span>
+            {% elif tarefa.status == 'atrasada' %}
+            <span class="badge bg-danger">
+              <i class="fas fa-clock me-1"></i>
+              Atrasada
+            </span>
             {% else %}
             <span class="badge bg-warning text-dark">Pendente</span>
             {% endif %}
