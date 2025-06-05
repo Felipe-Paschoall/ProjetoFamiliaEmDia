@@ -1,0 +1,89 @@
+{% extends "base.html" %} {% block title %}Sobre{% endblock %} {% block content
+%}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <div class="card shadow">
+        <div class="card-body">
+          <h1 class="card-title text-center mb-4">Sobre o Família em Dia</h1>
+
+          <div class="mb-4">
+            <h4 class="mb-3">O que é?</h4>
+            <p class="lead">
+              O Família em Dia é um sistema que ajuda famílias a gerenciar
+              tarefas domésticas de forma organizada e colaborativa.
+            </p>
+          </div>
+
+          <div class="mb-4">
+            <h4 class="mb-3">Como funciona?</h4>
+            <div class="card-text">
+              <ul class="list-group list-group-flush">
+                <li class="list-group-item">
+                  <i class="fas fa-users text-primary me-2"></i>
+                  Crie uma família e adicione seus membros
+                </li>
+                <li class="list-group-item">
+                  <i class="fas fa-tasks text-primary me-2"></i>
+                  Distribua tarefas entre os membros
+                </li>
+                <li class="list-group-item">
+                  <i class="fas fa-check-circle text-primary me-2"></i>
+                  Acompanhe a conclusão das atividades
+                </li>
+                <li class="list-group-item">
+                  <i class="fas fa-history text-primary me-2"></i>
+                  Mantenha um histórico organizado
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <h4 class="mb-3">Benefícios</h4>
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <div class="card h-100">
+                  <div class="card-body">
+                    <h5 class="card-title">
+                      <i class="fas fa-heart text-danger me-2"></i>
+                      Harmonia Familiar
+                    </h5>
+                    <p class="card-text">
+                      Distribua as responsabilidades de forma justa e
+                      transparente
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6 mb-3">
+                <div class="card h-100">
+                  <div class="card-body">
+                    <h5 class="card-title">
+                      <i class="fas fa-clock text-warning me-2"></i>
+                      Organização
+                    </h5>
+                    <p class="card-text">
+                      Mantenha as tarefas em dia e evite acúmulos
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="text-center">
+            <a
+              href="{{ url_for('familia.create_family') }}"
+              class="btn btn-primary btn-lg"
+            >
+              <i class="fas fa-plus me-2"></i>
+              Criar Minha Família
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,106 @@
+{% extends "base.html" %} {% block title %}Solicitações{% endblock %} {% block
+content %}
+<div class="container">
+  <div class="row mb-4">
+    <div class="col">
+      <h2>
+        <i class="fas fa-clipboard-list text-primary me-2"></i>
+        {% if session.get('is_admin') %} Solicitações da Família {% else %}
+        Minhas Solicitações {% endif %}
+      </h2>
+    </div>
+  </div>
+
+  {% if solicitacoes %}
+  <div class="table-responsive">
+    <table class="table table-hover">
+      <thead class="table-light">
+        <tr>
+          <th>Data</th>
+          {% if session.get('is_admin') %}
+          <th>Solicitante</th>
+          {% endif %}
+          <th>Tipo</th>
+          <th>Detalhes</th>
+          <th>Status</th>
+          {% if session.get('is_admin') %}
+          <th>Ações</th>
+          {% endif %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for solicitacao in solicitacoes %}
+        <tr>
+          <td>{{ solicitacao.created_at|datetime }}</td>
+          {% if session.get('is_admin') %}
+          <td>{{ solicitacao.solicitante_nome }}</td>
+          {% endif %}
+          <td>
+            {% if solicitacao.tipo == 'alteracao_dados' %}
+            <span class="badge bg-info">Alteração de Dados</span>
+            {% endif %}
+          </td>
+          <td>
+            {% set detalhes = solicitacao.detalhes|from_json %}
+            <ul class="list-unstyled mb-0">
+              {% if detalhes.novo_nome %}
+              <li><strong>Novo Nome:</strong> {{ detalhes.novo_nome }}</li>
+              {% endif %} {% if detalhes.nova_senha %}
+              <li><strong>Nova Senha:</strong> Solicitada</li>
+              {% endif %}
+            </ul>
+          </td>
+          <td>
+            {% if solicitacao.status == 'pendente' %}
+            <span class="badge bg-warning text-dark">Pendente</span>
+            {% elif solicitacao.status == 'aprovado' %}
+            <span class="badge bg-success">Aprovado</span>
+            {% elif solicitacao.status == 'rejeitado' %}
+            <span class="badge bg-danger">Rejeitado</span>
+            {% endif %}
+          </td>
+          {% if session.get('is_admin') and solicitacao.status == 'pendente' %}
+          <td>
+            <div class="btn-group" role="group">
+              <form
+                method="POST"
+                action="{{ url_for('solicitacoes.approve_request', id=solicitacao.id) }}"
+                class="d-inline"
+              >
+                <button
+                  type="submit"
+                  class="btn btn-success btn-sm"
+                  title="Aprovar"
+                >
+                  <i class="fas fa-check"></i>
+                </button>
+              </form>
+              <form
+                method="POST"
+                action="{{ url_for('solicitacoes.reject_request', id=solicitacao.id) }}"
+                class="d-inline"
+              >
+                <button
+                  type="submit"
+                  class="btn btn-danger btn-sm"
+                  title="Rejeitar"
+                >
+                  <i class="fas fa-times"></i>
+                </button>
+              </form>
+            </div>
+          </td>
+          {% endif %}
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="alert alert-info" role="alert">
+    <i class="fas fa-info-circle me-2"></i>
+    Nenhuma solicitação encontrada.
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

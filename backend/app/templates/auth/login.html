@@ -1,0 +1,77 @@
+{% extends "base.html" %} {% block title %}Login{% endblock %} {% block content
+%}
+<div class="row justify-content-center">
+  <div class="col-md-6 col-lg-4">
+    <div class="card shadow">
+      <div class="card-body">
+        <h2 class="card-title text-center mb-4">Bem-vindo(a)</h2>
+        <form method="POST" action="{{ url_for('auth.login') }}">
+          <div class="mb-3">
+            <label for="cpf" class="form-label">CPF</label>
+            <div class="input-group">
+              <span class="input-group-text"
+                ><i class="fas fa-id-card"></i
+              ></span>
+              <input
+                type="text"
+                class="form-control"
+                id="cpf"
+                name="cpf"
+                required
+                pattern="\d{3}\.\d{3}\.\d{3}-\d{2}"
+                title="Digite um CPF válido: xxx.xxx.xxx-xx"
+                placeholder="000.000.000-00"
+              />
+            </div>
+          </div>
+          <div class="mb-3">
+            <label for="password" class="form-label">Senha</label>
+            <div class="input-group">
+              <span class="input-group-text"><i class="fas fa-lock"></i></span>
+              <input
+                type="password"
+                class="form-control"
+                id="password"
+                name="password"
+                required
+              />
+            </div>
+          </div>
+          <div class="mb-3 form-check">
+            <input
+              type="checkbox"
+              class="form-check-input"
+              id="lembrar"
+              name="lembrar"
+            />
+            <label class="form-check-label" for="lembrar">Lembrar de mim</label>
+          </div>
+          <button type="submit" class="btn btn-primary w-100">Entrar</button>
+        </form>
+        <hr />
+        <div class="text-center">
+          <p class="mb-2">Não tem uma família?</p>
+          <a
+            href="{{ url_for('familia.create_family') }}"
+            class="btn btn-outline-primary"
+          >
+            <i class="fas fa-plus me-2"></i>
+            Criar Nova Família
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% block extra_js %}
+<script>
+  document.getElementById('cpf').addEventListener('input', function (e) {
+    let value = e.target.value.replace(/\D/g, '');
+    if (value.length <= 11) {
+      value = value.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+      e.target.value = value;
+    }
+  });
+</script>
+{% endblock %} {% endblock %}

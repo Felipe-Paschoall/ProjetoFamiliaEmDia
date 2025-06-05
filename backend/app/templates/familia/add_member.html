@@ -1,0 +1,80 @@
+{% extends "base.html" %} {% block title %}Adicionar Membro{% endblock %} {%
+block content %}
+<div class="row justify-content-center">
+  <div class="col-md-6 col-lg-4">
+    <div class="card shadow">
+      <div class="card-body">
+        <h2 class="card-title text-center mb-4">Adicionar Novo Membro</h2>
+        <form method="POST" action="{{ url_for('familia.add_member') }}">
+          <div class="mb-3">
+            <label for="nome" class="form-label">Nome</label>
+            <div class="input-group">
+              <span class="input-group-text"><i class="fas fa-user"></i></span>
+              <input
+                type="text"
+                class="form-control"
+                id="nome"
+                name="nome"
+                required
+              />
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label for="cpf" class="form-label">CPF</label>
+            <div class="input-group">
+              <span class="input-group-text"
+                ><i class="fas fa-id-card"></i
+              ></span>
+              <input
+                type="text"
+                class="form-control"
+                id="cpf"
+                name="cpf"
+                required
+                pattern="\d{3}\.\d{3}\.\d{3}-\d{2}"
+                title="Digite um CPF válido: xxx.xxx.xxx-xx"
+                placeholder="000.000.000-00"
+              />
+            </div>
+          </div>
+
+          <div class="alert alert-info" role="alert">
+            <i class="fas fa-info-circle me-2"></i>
+            A senha inicial será "senha123". O membro deverá alterá-la no
+            primeiro acesso.
+          </div>
+
+          <button type="submit" class="btn btn-primary w-100">
+            <i class="fas fa-user-plus me-2"></i>
+            Adicionar Membro
+          </button>
+        </form>
+
+        <hr />
+
+        <div class="text-center">
+          <a
+            href="{{ url_for('familia.list_members') }}"
+            class="btn btn-outline-secondary"
+          >
+            <i class="fas fa-arrow-left me-2"></i>
+            Voltar para Lista de Membros
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% block extra_js %}
+<script>
+  document.getElementById('cpf').addEventListener('input', function (e) {
+    let value = e.target.value.replace(/\D/g, '');
+    if (value.length <= 11) {
+      value = value.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+      e.target.value = value;
+    }
+  });
+</script>
+{% endblock %} {% endblock %}

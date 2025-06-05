@@ -1,0 +1,98 @@
+{% extends "base.html" %} {% block title %}Criar Tarefa{% endblock %} {% block
+content %}
+<div class="row justify-content-center">
+  <div class="col-md-6">
+    <div class="card shadow">
+      <div class="card-body">
+        <h2 class="card-title text-center mb-4">Criar Nova Tarefa</h2>
+        <form method="POST" action="{{ url_for('tarefas.create_task') }}">
+          <div class="mb-3">
+            <label for="destinatario_id" class="form-label">Para</label>
+            <div class="input-group">
+              <span class="input-group-text"><i class="fas fa-user"></i></span>
+              <select
+                class="form-select"
+                id="destinatario_id"
+                name="destinatario_id"
+                required
+              >
+                <option value="">Selecione um membro</option>
+                {% for membro in membros %}
+                <option value="{{ membro.id }}">{{ membro.nome }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label for="titulo" class="form-label">Título</label>
+            <div class="input-group">
+              <span class="input-group-text"><i class="fas fa-tasks"></i></span>
+              <input
+                type="text"
+                class="form-control"
+                id="titulo"
+                name="titulo"
+                required
+              />
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label for="descricao" class="form-label">Descrição</label>
+            <div class="input-group">
+              <span class="input-group-text"
+                ><i class="fas fa-align-left"></i
+              ></span>
+              <textarea
+                class="form-control"
+                id="descricao"
+                name="descricao"
+                rows="3"
+              ></textarea>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label for="horario" class="form-label">Horário</label>
+            <div class="input-group">
+              <span class="input-group-text"><i class="fas fa-clock"></i></span>
+              <input
+                type="datetime-local"
+                class="form-control"
+                id="horario"
+                name="horario"
+              />
+            </div>
+            <div class="form-text">
+              Opcional. Deixe em branco se não houver um horário específico.
+            </div>
+          </div>
+
+          {% if not session.get('is_admin') %}
+          <div class="alert alert-info" role="alert">
+            <i class="fas fa-info-circle me-2"></i>
+            Sua tarefa será enviada para aprovação do administrador.
+          </div>
+          {% endif %}
+
+          <div class="d-grid gap-2">
+            <button type="submit" class="btn btn-primary">
+              <i class="fas fa-paper-plane me-2"></i>
+              {% if session.get('is_admin') %} Criar Tarefa {% else %} Enviar
+              para Aprovação {% endif %}
+            </button>
+            <a
+              href="{{ url_for('tarefas.list_tasks') }}"
+              class="btn btn-outline-secondary"
+            >
+              <i class="fas fa-arrow-left me-2"></i>
+              Voltar
+            </a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

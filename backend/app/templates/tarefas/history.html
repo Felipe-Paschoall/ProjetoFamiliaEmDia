@@ -1,0 +1,64 @@
+{% extends "base.html" %} {% block title %}Histórico de Tarefas{% endblock %} {%
+block content %}
+<div class="container">
+  <div class="row mb-4">
+    <div class="col">
+      <h2>
+        <i class="fas fa-history text-primary me-2"></i>
+        Histórico de Tarefas
+      </h2>
+    </div>
+    <div class="col-auto">
+      <a
+        href="{{ url_for('tarefas.list_tasks') }}"
+        class="btn btn-outline-secondary"
+      >
+        <i class="fas fa-arrow-left me-2"></i>
+        Voltar
+      </a>
+    </div>
+  </div>
+
+  {% if tasks %}
+  <div class="table-responsive">
+    <table class="table table-hover">
+      <thead class="table-light">
+        <tr>
+          <th>Tarefa</th>
+          <th>Criada por</th>
+          <th>Atribuída para</th>
+          <th>Horário</th>
+          <th>Concluída em</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for tarefa in tasks %}
+        <tr>
+          <td>
+            <strong>{{ tarefa.titulo }}</strong>
+            {% if tarefa.descricao %}
+            <br />
+            <small class="text-muted">{{ tarefa.descricao }}</small>
+            {% endif %}
+          </td>
+          <td>{{ tarefa.criador_nome }}</td>
+          <td>{{ tarefa.responsavel_nome }}</td>
+          <td>
+            {% if tarefa.horario %} {{ tarefa.horario|datetime }} {% else %}
+            <span class="text-muted">Não definido</span>
+            {% endif %}
+          </td>
+          <td>{{ tarefa.updated_at|datetime }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="alert alert-info" role="alert">
+    <i class="fas fa-info-circle me-2"></i>
+    Nenhuma tarefa concluída encontrada.
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

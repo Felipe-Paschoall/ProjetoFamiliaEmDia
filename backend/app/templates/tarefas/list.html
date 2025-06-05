@@ -1,0 +1,167 @@
+{% extends "base.html" %} {% block title %}Minhas Tarefas{% endblock %} {% block
+content %}
+<div class="container">
+  <div class="row mb-4">
+    <div class="col">
+      <h2 class="mb-3">
+        {% if show_all %} Tarefas da Família {% else %} Minhas Tarefas {% endif
+        %}
+      </h2>
+    </div>
+    <div class="col-auto">
+      <div class="btn-group" role="group">
+        <a href="{{ url_for('tarefas.create_task') }}" class="btn btn-primary">
+          <i class="fas fa-plus me-2"></i>
+          Criar Tarefa
+        </a>
+        <a
+          href="{{ url_for('tarefas.history') }}"
+          class="btn btn-outline-secondary"
+        >
+          <i class="fas fa-history me-2"></i>
+          Histórico
+        </a>
+        {% if session.get('is_admin') %}
+        <a
+          href="{{ url_for('solicitacoes.list_requests') }}"
+          class="btn btn-outline-info"
+        >
+          <i class="fas fa-bell me-2"></i>
+          Solicitações
+        </a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  {% if session.get('is_admin') %}
+  <div class="mb-4">
+    <div class="form-check form-switch">
+      <input
+        class="form-check-input"
+        type="checkbox"
+        id="showAllTasks"
+        {%
+        if
+        show_all
+        %}checked{%
+        endif
+        %}
+      />
+      <label class="form-check-label" for="showAllTasks">
+        Ver todas as tarefas da família
+      </label>
+    </div>
+  </div>
+  {% endif %} {% if tasks %}
+  <div class="table-responsive">
+    <table class="table table-hover">
+      <thead class="table-light">
+        <tr>
+          <th>Tarefa</th>
+          <th>Criada por</th>
+          <th>Atribuída para</th>
+          <th>Horário</th>
+          <th>Status</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for tarefa in tasks %}
+        <tr>
+          <td>
+            <strong>{{ tarefa.titulo }}</strong>
+            {% if tarefa.descricao %}
+            <br />
+            <small class="text-muted">{{ tarefa.descricao }}</small>
+            {% endif %}
+          </td>
+          <td>{{ tarefa.criador_nome }}</td>
+          <td>{{ tarefa.responsavel_nome }}</td>
+          <td>
+            {% if tarefa.horario %} {{ tarefa.horario|datetime }} {% else %}
+            <span class="text-muted">Não definido</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if tarefa.status == 'concluida' %}
+            <span class="badge bg-success">Concluída</span>
+            {% elif tarefa.status == 'aprovada' %}
+            <span class="badge bg-primary">Em andamento</span>
+            {% elif tarefa.status == 'rejeitada' %}
+            <span class="badge bg-danger">Rejeitada</span>
+            {% else %}
+            <span class="badge bg-warning text-dark">Aguardando aprovação</span>
+            {% endif %}
+          </td>
+          <td>
+            <div class="btn-group btn-group-sm">
+              {% if tarefa.status == 'aprovada' and tarefa.destinatario_id ==
+              session.get('user_id') %}
+              <form
+                method="POST"
+                action="{{ url_for('tarefas.complete_task', id=tarefa.id) }}"
+                class="d-inline"
+              >
+                <button
+                  type="submit"
+                  class="btn btn-success"
+                  title="Marcar como concluída"
+                >
+                  <i class="fas fa-check"></i>
+                </button>
+              </form>
+              {% endif %} {% if session.get('is_admin') and tarefa.status ==
+              'pendente' %}
+              <form
+                method="POST"
+                action="{{ url_for('tarefas.approve_task', id=tarefa.id) }}"
+                class="d-inline"
+              >
+                <button
+                  type="submit"
+                  class="btn btn-primary"
+                  title="Aprovar tarefa"
+                >
+                  <i class="fas fa-thumbs-up"></i>
+                </button>
+              </form>
+              <form
+                method="POST"
+                action="{{ url_for('tarefas.reject_task', id=tarefa.id) }}"
+                class="d-inline"
+              >
+                <button
+                  type="submit"
+                  class="btn btn-danger"
+                  title="Rejeitar tarefa"
+                >
+                  <i class="fas fa-thumbs-down"></i>
+                </button>
+              </form>
+              {% endif %}
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="alert alert-info" role="alert">
+    <i class="fas fa-info-circle me-2"></i>
+    Nenhuma tarefa encontrada.
+  </div>
+  {% endif %}
+</div>
+
+{% block extra_js %}
+<script>
+  document
+    .getElementById('showAllTasks')
+    .addEventListener('change', function () {
+      window.location.href =
+        "{{ url_for('tarefas.list_tasks', all='true' if not show_all else 'false') }}";
+    });
+</script>
+{% endblock %} {% endblock %}
