@@ -3,10 +3,7 @@ block content %}
 <div class="container">
   <div class="row mb-4">
     <div class="col">
-      <h2>
-        <i class="fas fa-history text-primary me-2"></i>
-        Histórico de Tarefas
-      </h2>
+      <h2 class="mb-3">Histórico de Tarefas</h2>
     </div>
     <div class="col-auto">
       <a
@@ -19,6 +16,47 @@ block content %}
     </div>
   </div>
 
+  <div class="card shadow mb-4">
+    <div class="card-body">
+      <h5 class="card-title mb-3">
+        <i class="fas fa-filter me-2"></i>
+        Filtrar por Status
+      </h5>
+      <div class="btn-group mb-3" role="group">
+        <a
+          href="{{ url_for('tarefas.history', status='all') }}"
+          class="btn btn-outline-secondary {% if current_status == 'all' %}active{% endif %}"
+        >
+          Todas
+        </a>
+        <a
+          href="{{ url_for('tarefas.history', status='pendentes') }}"
+          class="btn btn-outline-warning {% if current_status == 'pendentes' %}active{% endif %}"
+        >
+          Pendentes
+        </a>
+        <a
+          href="{{ url_for('tarefas.history', status='ativas') }}"
+          class="btn btn-outline-primary {% if current_status == 'ativas' %}active{% endif %}"
+        >
+          Ativas
+        </a>
+        <a
+          href="{{ url_for('tarefas.history', status='rejeitadas') }}"
+          class="btn btn-outline-danger {% if current_status == 'rejeitadas' %}active{% endif %}"
+        >
+          Rejeitadas
+        </a>
+        <a
+          href="{{ url_for('tarefas.history', status='concluidas') }}"
+          class="btn btn-outline-success {% if current_status == 'concluidas' %}active{% endif %}"
+        >
+          Concluídas
+        </a>
+      </div>
+    </div>
+  </div>
+
   {% if tasks %}
   <div class="table-responsive">
     <table class="table table-hover">
@@ -28,7 +66,8 @@ block content %}
           <th>Criada por</th>
           <th>Atribuída para</th>
           <th>Horário</th>
-          <th>Concluída em</th>
+          <th>Status</th>
+          <th>Data</th>
         </tr>
       </thead>
       <tbody>
@@ -39,6 +78,13 @@ block content %}
             {% if tarefa.descricao %}
             <br />
             <small class="text-muted">{{ tarefa.descricao }}</small>
+            {% endif %} {% if tarefa.justificativa and tarefa.status ==
+            'rejeitada' %}
+            <br />
+            <small class="text-danger">
+              <i class="fas fa-info-circle me-1"></i>
+              Justificativa da rejeição: {{ tarefa.justificativa }}
+            </small>
             {% endif %}
           </td>
           <td>{{ tarefa.criador_nome }}</td>
@@ -48,7 +94,24 @@ block content %}
             <span class="text-muted">Não definido</span>
             {% endif %}
           </td>
-          <td>{{ tarefa.updated_at|datetime }}</td>
+          <td>
+            {% if tarefa.status == 'concluida' %}
+            <span class="badge bg-success">Concluída</span>
+            {% elif tarefa.status == 'aprovada' %}
+            <span class="badge bg-primary">Em andamento</span>
+            {% elif tarefa.status == 'rejeitada' %}
+            <span class="badge bg-danger">Rejeitada</span>
+            {% else %}
+            <span class="badge bg-warning text-dark">Pendente</span>
+            {% endif %}
+          </td>
+          <td>
+            <small>
+              Criada: {{ tarefa.created_at|datetime }}<br />
+              {% if tarefa.updated_at %} Atualizada: {{
+              tarefa.updated_at|datetime }} {% endif %}
+            </small>
+          </td>
         </tr>
         {% endfor %}
       </tbody>
@@ -57,7 +120,7 @@ block content %}
   {% else %}
   <div class="alert alert-info" role="alert">
     <i class="fas fa-info-circle me-2"></i>
-    Nenhuma tarefa concluída encontrada.
+    Nenhuma tarefa encontrada com os filtros selecionados.
   </div>
   {% endif %}
 </div>

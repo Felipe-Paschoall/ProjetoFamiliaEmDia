@@ -96,8 +96,17 @@ content %}
           </td>
           <td>
             <div class="btn-group btn-group-sm">
-              {% if tarefa.status == 'aprovada' and tarefa.destinatario_id ==
-              session.get('user_id') %}
+              {% if tarefa.criador_id == session.get('user_id') or
+              session.get('is_admin') %}
+              <a
+                href="{{ url_for('tarefas.edit_task', id=tarefa.id) }}"
+                class="btn btn-info"
+                title="Editar tarefa"
+              >
+                <i class="fas fa-edit"></i>
+              </a>
+              {% endif %} {% if tarefa.status == 'aprovada' and
+              tarefa.destinatario_id == session.get('user_id') %}
               <form
                 method="POST"
                 action="{{ url_for('tarefas.complete_task', id=tarefa.id) }}"
@@ -111,6 +120,15 @@ content %}
                   <i class="fas fa-check"></i>
                 </button>
               </form>
+              <button
+                type="button"
+                class="btn btn-danger"
+                title="Rejeitar tarefa"
+                data-bs-toggle="modal"
+                data-bs-target="#rejectModal{{ tarefa.id }}"
+              >
+                <i class="fas fa-times"></i>
+              </button>
               {% endif %} {% if session.get('is_admin') and tarefa.status ==
               'pendente' %}
               <form
@@ -141,6 +159,72 @@ content %}
               </form>
               {% endif %}
             </div>
+
+            <!-- Modal de Rejeição -->
+            {% if tarefa.status == 'aprovada' and tarefa.destinatario_id ==
+            session.get('user_id') %}
+            <div
+              class="modal fade"
+              id="rejectModal{{ tarefa.id }}"
+              tabindex="-1"
+            >
+              <div class="modal-dialog">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title">
+                      <i class="fas fa-times-circle text-danger me-2"></i>
+                      Rejeitar Tarefa
+                    </h5>
+                    <button
+                      type="button"
+                      class="btn-close"
+                      data-bs-dismiss="modal"
+                    ></button>
+                  </div>
+                  <form
+                    method="POST"
+                    action="{{ url_for('tarefas.reject_task', id=tarefa.id) }}"
+                  >
+                    <div class="modal-body">
+                      <p>
+                        Você está rejeitando a tarefa:
+                        <strong>{{ tarefa.titulo }}</strong>
+                      </p>
+                      <div class="mb-3">
+                        <label
+                          for="justificativa{{ tarefa.id }}"
+                          class="form-label"
+                        >
+                          Justificativa
+                        </label>
+                        <textarea
+                          class="form-control"
+                          id="justificativa{{ tarefa.id }}"
+                          name="justificativa"
+                          rows="3"
+                          required
+                          placeholder="Por favor, explique o motivo da rejeição..."
+                        ></textarea>
+                      </div>
+                    </div>
+                    <div class="modal-footer">
+                      <button
+                        type="button"
+                        class="btn btn-secondary"
+                        data-bs-dismiss="modal"
+                      >
+                        Cancelar
+                      </button>
+                      <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-times me-2"></i>
+                        Rejeitar Tarefa
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+            {% endif %}
           </td>
         </tr>
         {% endfor %}

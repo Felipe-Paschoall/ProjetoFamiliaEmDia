@@ -33,6 +33,7 @@ CREATE TABLE tarefa (
     descricao TEXT,
     horario DATETIME,
     status TEXT NOT NULL DEFAULT 'pendente',
+    justificativa TEXT,
     created_at TIMESTAMP NOT NULL DEFAULT (datetime('now', '-3 hours')),
     updated_at TIMESTAMP,
     FOREIGN KEY (familia_id) REFERENCES familia (id),
