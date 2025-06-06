@@ -1,0 +1,287 @@
+{% extends "base.html" %} {% block title %}Sobre{% endblock %} {% block content
+%}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <div class="card shadow">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="card-title text-center mb-4 mb-0">
+              Sobre o Família em Dia
+            </h1>
+            <button
+              type="button"
+              class="btn btn-info ms-3"
+              data-bs-toggle="modal"
+              data-bs-target="#modalDesenvolvimento"
+            >
+              Desenvolvimento
+            </button>
+          </div>
+
+          <!-- Modal Desenvolvimento -->
+          <div
+            class="modal fade"
+            id="modalDesenvolvimento"
+            tabindex="-1"
+            aria-labelledby="modalDesenvolvimentoLabel"
+            aria-hidden="true"
+          >
+            <div class="modal-dialog modal-lg modal-dialog-scrollable">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="modalDesenvolvimentoLabel">
+                    Detalhes de Desenvolvimento
+                  </h5>
+                  <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                    aria-label="Fechar"
+                  ></button>
+                </div>
+                <div class="modal-body">
+                  <h6 class="fw-bold">Endpoints</h6>
+                  <ul>
+                    <li>
+                      <strong>/auth/login</strong> (GET, POST): Tela e ação de
+                      login do usuário.
+                    </li>
+                    <li>
+                      <strong>/auth/logout</strong> (GET): Logout do usuário.
+                    </li>
+                    <li><strong>/auth/about</strong> (GET): Página Sobre.</li>
+                    <li>
+                      <strong>/familia/create</strong> (GET, POST): Criação de
+                      nova família e usuário administrador.
+                    </li>
+                    <li>
+                      <strong>/familia/list_members</strong> (GET): Lista
+                      membros da família.
+                    </li>
+                    <li>
+                      <strong>/familia/members/&lt;id&gt;/delete</strong>
+                      (POST): Exclui membro da família (admin).
+                    </li>
+                    <li>
+                      <strong>/tarefas/</strong> (GET): Lista tarefas da
+                      família.
+                    </li>
+                    <li>
+                      <strong>/tarefas/create</strong> (GET, POST): Criação de
+                      nova tarefa.
+                    </li>
+                    <li>
+                      <strong>/tarefas/&lt;id&gt;/edit</strong> (GET, POST):
+                      Edita tarefa existente.
+                    </li>
+                    <li>
+                      <strong>/tarefas/&lt;id&gt;/complete</strong> (POST):
+                      Conclui tarefa (com justificativa se atrasada).
+                    </li>
+                    <li>
+                      <strong>/tarefas/&lt;id&gt;/approve</strong> (POST):
+                      Aprova tarefa (admin).
+                    </li>
+                    <li>
+                      <strong>/tarefas/&lt;id&gt;/reject</strong> (POST):
+                      Rejeita tarefa (com justificativa).
+                    </li>
+                    <li>
+                      <strong>/tarefas/history</strong> (GET): Histórico de
+                      tarefas.
+                    </li>
+                    <li>
+                      <strong>/solicitacoes/</strong> (GET): Lista solicitações
+                      de alteração de dados e tarefas pendentes.
+                    </li>
+                    <li>
+                      <strong>/solicitacoes/create</strong> (POST): Cria
+                      solicitação de alteração de dados.
+                    </li>
+                    <li>
+                      <strong>/solicitacoes/&lt;id&gt;/approve</strong> (POST):
+                      Aprova solicitação (admin).
+                    </li>
+                    <li>
+                      <strong>/solicitacoes/&lt;id&gt;/reject</strong> (POST):
+                      Rejeita solicitação (admin).
+                    </li>
+                  </ul>
+                  <hr />
+                  <h6 class="fw-bold">Banco de Dados</h6>
+                  <ul>
+                    <li><strong>familia</strong>: id, nome, created_at</li>
+                    <li>
+                      <strong>usuario</strong>: id, familia_id (FK), nome, cpf,
+                      password, is_admin, first_login, created_at
+                    </li>
+                    <li>
+                      <strong>tarefa</strong>: id, familia_id (FK), criador_id
+                      (FK), destinatario_id (FK), titulo, descricao, horario,
+                      status, created_at, updated_at
+                    </li>
+                    <li>
+                      <strong>solicitacao</strong>: id, usuario_id (FK), tipo,
+                      detalhes, status, created_at, updated_at
+                    </li>
+                  </ul>
+                  <p class="mb-1">Relacionamentos:</p>
+                  <ul>
+                    <li>
+                      Uma <strong>família</strong> possui vários
+                      <strong>usuários</strong>.
+                    </li>
+                    <li>
+                      Uma <strong>tarefa</strong> pertence a uma família, tem um
+                      criador e um destinatário (ambos usuários).
+                    </li>
+                    <li>
+                      Uma <strong>solicitação</strong> pertence a um usuário.
+                    </li>
+                  </ul>
+                  <hr />
+                  <h6 class="fw-bold">Conexão entre Telas e Endpoints</h6>
+                  <ul>
+                    <li>
+                      <strong>Botão "Entrar"</strong> (login):
+                      <code>/auth/login</code> (POST)
+                    </li>
+                    <li>
+                      <strong>Botão "Tarefas"</strong> (menu):
+                      <code>/tarefas/</code> (GET)
+                    </li>
+                    <li>
+                      <strong>Botão "Nova Tarefa"</strong>:
+                      <code>/tarefas/create</code> (GET/POST)
+                    </li>
+                    <li>
+                      <strong>Botão "Editar"</strong> (em cada tarefa):
+                      <code>/tarefas/&lt;id&gt;/edit</code> (GET/POST)
+                    </li>
+                    <li>
+                      <strong>Botão "Concluir"</strong> (em cada tarefa):
+                      <code>/tarefas/&lt;id&gt;/complete</code> (POST)
+                    </li>
+                    <li>
+                      <strong>Botão "Histórico"</strong>:
+                      <code>/tarefas/history</code> (GET)
+                    </li>
+                    <li>
+                      <strong>Botão "Família"</strong> (menu):
+                      <code>/familia/list_members</code> (GET)
+                    </li>
+                    <li>
+                      <strong>Botão "Adicionar Membro"</strong>:
+                      <code>/familia/add_member</code> (GET/POST)
+                    </li>
+                    <li>
+                      <strong>Botão "Excluir"</strong> (em cada membro):
+                      <code>/familia/members/&lt;id&gt;/delete</code> (POST)
+                    </li>
+                    <li>
+                      <strong>Botão "Solicitações"</strong> (menu/admin):
+                      <code>/solicitacoes/</code> (GET)
+                    </li>
+                    <li>
+                      <strong>Botão "Aprovar/Rejeitar"</strong> (em
+                      solicitações):
+                      <code>/solicitacoes/&lt;id&gt;/approve</code> ou
+                      <code>/solicitacoes/&lt;id&gt;/reject</code> (POST)
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <h4 class="mb-3">O que é?</h4>
+            <p class="lead">
+              O Família em Dia é um sistema que ajuda famílias a gerenciar
+              tarefas domésticas de forma organizada e colaborativa.
+            </p>
+          </div>
+
+          <div class="mb-4">
+            <h4 class="mb-3">Como funciona?</h4>
+            <div class="card-text">
+              <ul class="list-group list-group-flush">
+                <li class="list-group-item">
+                  <i class="fas fa-users text-primary me-2"></i>
+                  <strong>Gestão Familiar:</strong> Crie uma família e adicione
+                  membros para compartilhar responsabilidades
+                </li>
+                <li class="list-group-item">
+                  <i class="fas fa-tasks text-primary me-2"></i>
+                  <strong>Distribuição de Tarefas:</strong> Atribua tarefas
+                  específicas para cada membro da família
+                </li>
+                <li class="list-group-item">
+                  <i class="fas fa-check-circle text-primary me-2"></i>
+                  <strong>Acompanhamento:</strong> Monitore o progresso e
+                  conclusão das atividades em tempo real
+                </li>
+                <li class="list-group-item">
+                  <i class="fas fa-history text-primary me-2"></i>
+                  <strong>Histórico Completo:</strong> Mantenha registros
+                  organizados de todas as atividades
+                </li>
+                <li class="list-group-item">
+                  <i class="fas fa-bell text-primary me-2"></i>
+                  <strong>Sistema de Solicitações:</strong> Gerencie pedidos de
+                  alteração e justificativas
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <h4 class="mb-3">Recursos Principais</h4>
+            <div class="row g-3">
+              <div class="col-md-6">
+                <div class="card h-100">
+                  <div class="card-body">
+                    <h5 class="card-title">
+                      <i class="fas fa-shield-alt text-primary me-2"></i>
+                      Administração
+                    </h5>
+                    <p class="card-text">
+                      Controle total para administradores da família, com
+                      aprovação de solicitações e gestão de membros.
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="card h-100">
+                  <div class="card-body">
+                    <h5 class="card-title">
+                      <i class="fas fa-calendar-check text-primary me-2"></i>
+                      Tarefas
+                    </h5>
+                    <p class="card-text">
+                      Sistema completo de tarefas com prazos, status e
+                      justificativas para atrasos.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="text-center mt-5">
+            <hr class="mb-4" />
+            <p class="text-muted mb-1">Desenvolvido por</p>
+            <h5 class="mb-4">Felipe Paschoal e Vinícius Kenzo</h5>
+            <a href="{{ url_for('auth.login') }}" class="btn btn-primary">
+              <i class="fas fa-arrow-left me-2"></i>
+              Voltar para Login
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

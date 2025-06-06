@@ -101,4 +101,8 @@ def change_password():
             
         flash(error, 'error')
         
-    return render_template('auth/change_password.html') 
+    return render_template('auth/change_password.html')
+
+@bp.route('/about')
+def about():
+    return render_template('auth/about.html') 
