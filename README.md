@@ -58,18 +58,78 @@ O projeto está dividido em três partes principais:
 
 ## Como Executar
 
-1. **Configurar Banco de Dados**
+1. **Pré-requisitos**
+   - Python 3.8 ou superior
+   - SQLite3
+   - Git (opcional, para clonar o repositório)
 
-   - Instalar SQLite3
-   - Seguir instruções em [BancoDeDados/README.md](./BancoDeDados/README.md)
+2. **Configurar o Ambiente**
+   ```bash
+   # Clone o repositório (se ainda não tiver feito)
+   git clone [URL_DO_REPOSITÓRIO]
+   cd ProjetoFamiliaEmDia
 
-2. **Configurar Backend**
+   # Instale as dependências do Python
+   pip install -r backend/requirements.txt
+   ```
 
-   - Instalar Python
-   - Seguir instruções em [backend/README.md](./backend/README.md)
+3. **Configurar o Banco de Dados**
+   ```bash
+   # Navegue até a pasta do backend
+   cd backend
 
-3. **Configurar Frontend**
-   - Seguir instruções em [frontend/README.md](./frontend/README.md)
+   # Execute o script de inicialização do banco de dados
+   python init_db.py
+   ```
+   Você deve ver a mensagem "Banco de dados inicializado com sucesso!" e a lista de tabelas criadas.
+
+4. **Executar o Projeto**
+   ```bash
+   # Execute o servidor
+   python run.py
+   ```
+
+   O servidor iniciará automaticamente:
+   - Backend API: http://localhost:5000
+   - Frontend: http://localhost:5000 (servido pelo próprio backend)
+
+5. **Acessar o Sistema**
+   - Abra seu navegador e acesse http://localhost:5000
+   - Como é uma instalação nova, você precisará:
+     1. Criar uma nova família
+     2. Registrar um usuário administrador
+     3. Começar a usar o sistema
+
+**Observações:**
+- O frontend é servido automaticamente pelo backend Flask
+- O banco de dados SQLite é criado localmente na pasta `BancoDeDados`
+- Certifique-se de que a porta 5000 está disponível no seu sistema
+
+**Solução de Problemas Comuns:**
+
+1. **Erro "no such table"**
+   - Se você encontrar o erro "no such table", execute novamente o script de inicialização:
+     ```bash
+     cd backend
+     python init_db.py
+     ```
+   - Verifique se o arquivo `BancoDeDados/familia.db` existe e tem tamanho maior que 0 bytes
+
+2. **Erro de permissão**
+   - Certifique-se de que você tem permissões de escrita na pasta do projeto
+   - No Windows, execute o PowerShell como administrador se necessário
+   - Verifique se o arquivo `BancoDeDados/familia.db` não está aberto em outro programa
+
+3. **Erro de porta em uso**
+   - Se a porta 5000 estiver em uso, você pode alterar a porta no arquivo `backend/run.py`
+   - Procure a linha `app.run(host='0.0.0.0', port=5000)` e altere o número da porta
+
+4. **Erro de dependências**
+   - Se encontrar erros relacionados a pacotes Python, tente reinstalar as dependências:
+     ```bash
+     pip uninstall -r backend/requirements.txt -y
+     pip install -r backend/requirements.txt
+     ```
 
 ## Desenvolvimento
 
