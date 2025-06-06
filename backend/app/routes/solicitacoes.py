@@ -13,21 +13,61 @@ def list_requests():
     if session.get('is_admin'):
         # Admin vê todas as solicitações da família
         solicitacoes = db.execute('''
-            SELECT s.*, u.nome as solicitante_nome
+            SELECT s.*, u.nome as solicitante_nome, 'alteracao_dados' as tipo_item
             FROM solicitacao s
             JOIN usuario u ON s.usuario_id = u.id
             WHERE u.familia_id = ?
-            ORDER BY s.created_at DESC
-        ''', (session['family_id'],)).fetchall()
+            UNION ALL
+            SELECT 
+                t.id,
+                t.criador_id as usuario_id,
+                'tarefa_pendente' as tipo,
+                json_object(
+                    'titulo', t.titulo,
+                    'descricao', t.descricao,
+                    'destinatario_nome', u2.nome,
+                    'horario', t.horario
+                ) as detalhes,
+                t.status,
+                t.created_at,
+                t.updated_at,
+                u1.nome as solicitante_nome,
+                'tarefa' as tipo_item
+            FROM tarefa t
+            JOIN usuario u1 ON t.criador_id = u1.id
+            JOIN usuario u2 ON t.destinatario_id = u2.id
+            WHERE t.familia_id = ? AND t.status = 'pendente'
+            ORDER BY created_at DESC
+        ''', (session['family_id'], session['family_id'])).fetchall()
     else:
         # Usuário vê apenas suas solicitações
         solicitacoes = db.execute('''
-            SELECT s.*, u.nome as solicitante_nome
+            SELECT s.*, u.nome as solicitante_nome, 'alteracao_dados' as tipo_item
             FROM solicitacao s
             JOIN usuario u ON s.usuario_id = u.id
             WHERE s.usuario_id = ?
-            ORDER BY s.created_at DESC
-        ''', (session['user_id'],)).fetchall()
+            UNION ALL
+            SELECT 
+                t.id,
+                t.criador_id as usuario_id,
+                'tarefa_pendente' as tipo,
+                json_object(
+                    'titulo', t.titulo,
+                    'descricao', t.descricao,
+                    'destinatario_nome', u2.nome,
+                    'horario', t.horario
+                ) as detalhes,
+                t.status,
+                t.created_at,
+                t.updated_at,
+                u1.nome as solicitante_nome,
+                'tarefa' as tipo_item
+            FROM tarefa t
+            JOIN usuario u1 ON t.criador_id = u1.id
+            JOIN usuario u2 ON t.destinatario_id = u2.id
+            WHERE t.criador_id = ? AND t.status = 'pendente'
+            ORDER BY created_at DESC
+        ''', (session['user_id'], session['user_id'])).fetchall()
     
     return render_template('solicitacoes/list.html', solicitacoes=solicitacoes)
 

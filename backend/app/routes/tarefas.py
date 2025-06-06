@@ -66,63 +66,66 @@ def list_tasks():
     # Verifica tarefas atrasadas antes de listar
     verificar_todas_tarefas(db, session['family_id'])
     
-    # Se for admin e o parâmetro all=true, mostra todas as tarefas ativas da família
-    show_all = session.get('is_admin') and request.args.get('all') == 'true'
+    # Obtém o ID do usuário para filtrar, se especificado
+    filter_user_id = request.args.get('user_id', type=int)
     
-    if show_all:
-        tasks = db.execute('''
-            SELECT 
-                t.*,
-                u1.nome as criador_nome,
-                u2.nome as responsavel_nome,
-                datetime(t.created_at, '-3 hours') as created_at,
-                datetime(t.updated_at, '-3 hours') as updated_at
-            FROM tarefa t
-            JOIN usuario u1 ON t.criador_id = u1.id
-            JOIN usuario u2 ON t.destinatario_id = u2.id
-            WHERE u1.familia_id = ? 
-            AND t.status IN ('aprovada', 'atrasada', 'pendente')
-            ORDER BY 
-                CASE 
-                    WHEN t.status = 'atrasada' THEN 1
-                    WHEN t.status = 'aprovada' THEN 2
-                    WHEN t.status = 'pendente' THEN 3
-                    ELSE 4
-                END,
-                t.created_at DESC
-        ''', (session['family_id'],)).fetchall()
-    else:
-        # Mostra apenas tarefas ativas atribuídas ao usuário
-        tasks = db.execute('''
-            SELECT 
-                t.*,
-                u1.nome as criador_nome,
-                u2.nome as responsavel_nome,
-                datetime(t.created_at, '-3 hours') as created_at,
-                datetime(t.updated_at, '-3 hours') as updated_at
-            FROM tarefa t
-            JOIN usuario u1 ON t.criador_id = u1.id
-            JOIN usuario u2 ON t.destinatario_id = u2.id
-            WHERE t.destinatario_id = ? 
-            AND t.status IN ('aprovada', 'atrasada', 'pendente')
-            ORDER BY 
-                CASE 
-                    WHEN t.status = 'atrasada' THEN 1
-                    WHEN t.status = 'aprovada' THEN 2
-                    WHEN t.status = 'pendente' THEN 3
-                    ELSE 4
-                END,
-                t.created_at DESC
-        ''', (session['user_id'],)).fetchall()
+    # Monta a query base
+    base_query = '''
+        SELECT 
+            t.*,
+            u1.nome as criador_nome,
+            u2.nome as responsavel_nome,
+            datetime(t.created_at, '-3 hours') as created_at,
+            datetime(t.updated_at, '-3 hours') as updated_at
+        FROM tarefa t
+        JOIN usuario u1 ON t.criador_id = u1.id
+        JOIN usuario u2 ON t.destinatario_id = u2.id
+        WHERE t.familia_id = ? 
+        AND t.status IN ('aprovada', 'atrasada', 'pendente')
+    '''
     
-    return render_template('tarefas/list.html', tasks=tasks, show_all=show_all)
+    # Adiciona filtro por usuário se especificado
+    params = [session['family_id']]
+    if filter_user_id:
+        base_query += ' AND t.destinatario_id = ?'
+        params.append(filter_user_id)
+    
+    # Adiciona ordenação
+    base_query += '''
+        ORDER BY 
+            CASE 
+                WHEN t.status = 'atrasada' THEN 1
+                WHEN t.status = 'aprovada' THEN 2
+                WHEN t.status = 'pendente' THEN 3
+                ELSE 4
+            END,
+            t.created_at DESC
+    '''
+    
+    # Executa a query
+    tasks = db.execute(base_query, params).fetchall()
+    
+    # Obtém lista de membros da família para o filtro
+    membros = db.execute(
+        'SELECT id, nome FROM usuario WHERE familia_id = ? ORDER BY nome',
+        (session['family_id'],)
+    ).fetchall()
+    
+    return render_template('tarefas/list.html', 
+                         tasks=tasks, 
+                         membros=membros,
+                         filter_user_id=filter_user_id)
 
 @bp.route('/history')
 @login_required
 def history():
     db = current_app.get_db()
     
+    # Obtém os filtros da URL
     status_filter = request.args.get('status', 'all')
+    user_filter = request.args.get('user_id', type=int)
+    
+    # Define as condições de status
     status_conditions = {
         'pendentes': "t.status = 'pendente'",
         'atrasadas': "t.status = 'atrasada'",
@@ -132,40 +135,46 @@ def history():
     }
     status_condition = status_conditions.get(status_filter, "1=1")
     
-    # Se for admin, mostra histórico de toda a família
-    if session.get('is_admin'):
-        tasks = db.execute(f'''
-            SELECT 
-                t.*,
-                u1.nome as criador_nome,
-                u2.nome as responsavel_nome,
-                datetime(t.created_at, '-3 hours') as created_at,
-                datetime(t.updated_at, '-3 hours') as updated_at
-            FROM tarefa t
-            JOIN usuario u1 ON t.criador_id = u1.id
-            JOIN usuario u2 ON t.destinatario_id = u2.id
-            WHERE u1.familia_id = ? AND {status_condition}
-            ORDER BY t.updated_at DESC NULLS LAST, t.created_at DESC
-        ''', (session['family_id'],)).fetchall()
-    else:
-        # Mostra apenas histórico do usuário
-        tasks = db.execute(f'''
-            SELECT 
-                t.*,
-                u1.nome as criador_nome,
-                u2.nome as responsavel_nome,
-                datetime(t.created_at, '-3 hours') as created_at,
-                datetime(t.updated_at, '-3 hours') as updated_at
-            FROM tarefa t
-            JOIN usuario u1 ON t.criador_id = u1.id
-            JOIN usuario u2 ON t.destinatario_id = u2.id
-            WHERE t.destinatario_id = ? AND {status_condition}
-            ORDER BY t.updated_at DESC NULLS LAST, t.created_at DESC
-        ''', (session['user_id'],)).fetchall()
+    # Monta a query base
+    base_query = f'''
+        SELECT 
+            t.*,
+            u1.nome as criador_nome,
+            u2.nome as responsavel_nome,
+            datetime(t.created_at, '-3 hours') as created_at,
+            datetime(t.updated_at, '-3 hours') as updated_at
+        FROM tarefa t
+        JOIN usuario u1 ON t.criador_id = u1.id
+        JOIN usuario u2 ON t.destinatario_id = u2.id
+        WHERE t.familia_id = ? 
+        AND {status_condition}
+    '''
+    
+    # Adiciona filtro por usuário se especificado
+    params = [session['family_id']]
+    if user_filter:
+        base_query += ' AND (t.criador_id = ? OR t.destinatario_id = ?)'
+        params.extend([user_filter, user_filter])
+    
+    # Adiciona ordenação
+    base_query += '''
+        ORDER BY t.updated_at DESC NULLS LAST, t.created_at DESC
+    '''
+    
+    # Executa a query
+    tasks = db.execute(base_query, params).fetchall()
+    
+    # Obtém lista de membros da família para o filtro
+    membros = db.execute(
+        'SELECT id, nome FROM usuario WHERE familia_id = ? ORDER BY nome',
+        (session['family_id'],)
+    ).fetchall()
     
     return render_template('tarefas/history.html', 
                          tasks=tasks, 
-                         current_status=status_filter)
+                         current_status=status_filter,
+                         current_user_filter=user_filter,
+                         membros=membros)
 
 @bp.route('/create', methods=['GET', 'POST'])
 @login_required
@@ -246,7 +255,7 @@ def complete_task(id):
         
         # Se estiver atrasada, exige justificativa
         if task['status'] == 'atrasada':
-            justificativa = request.form.get('justificativa_atraso')
+            justificativa = request.form.get('justificativa')
             if not justificativa:
                 flash('É necessário fornecer uma justificativa para concluir uma tarefa atrasada.', 'error')
                 return redirect(url_for('tarefas.list_tasks'))
@@ -257,7 +266,7 @@ def complete_task(id):
         db.execute('''
             UPDATE tarefa 
             SET status = 'concluida',
-                justificativa = COALESCE(?, justificativa),
+                justificativa = ?,
                 updated_at = datetime('now', '-3 hours')
             WHERE id = ?
         ''', (justificativa, id))

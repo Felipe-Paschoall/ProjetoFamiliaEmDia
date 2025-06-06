@@ -1,31 +1,25 @@
-{% extends "base.html" %} {% block title %}Minhas Tarefas{% endblock %} {% block
-content %}
+{% extends "base.html" %}
+
+{% block title %}Tarefas{% endblock %}
+
+{% block content %}
 <div class="container">
   <div class="row mb-4">
     <div class="col">
-      <h2 class="mb-3">
-        {% if show_all %} Tarefas da Família {% else %} Minhas Tarefas {% endif
-        %}
-      </h2>
+      <h2>Tarefas</h2>
     </div>
     <div class="col-auto">
       <div class="btn-group" role="group">
         <a href="{{ url_for('tarefas.create_task') }}" class="btn btn-primary">
           <i class="fas fa-plus me-2"></i>
-          Criar Tarefa
+          Nova Tarefa
         </a>
-        <a
-          href="{{ url_for('tarefas.history') }}"
-          class="btn btn-outline-secondary"
-        >
+        <a href="{{ url_for('tarefas.history') }}" class="btn btn-outline-secondary">
           <i class="fas fa-history me-2"></i>
           Histórico
         </a>
         {% if session.get('is_admin') %}
-        <a
-          href="{{ url_for('solicitacoes.list_requests') }}"
-          class="btn btn-outline-info"
-        >
+        <a href="{{ url_for('solicitacoes.list_requests') }}" class="btn btn-outline-info">
           <i class="fas fa-bell me-2"></i>
           Solicitações
         </a>
@@ -34,291 +28,136 @@ content %}
     </div>
   </div>
 
-  {% if session.get('is_admin') %}
-  <div class="mb-4">
-    <div class="form-check form-switch">
-      <input
-        class="form-check-input"
-        type="checkbox"
-        id="showAllTasks"
-        {%
-        if
-        show_all
-        %}checked{%
-        endif
-        %}
-      />
-      <label class="form-check-label" for="showAllTasks">
-        Ver todas as tarefas da família
-      </label>
+  <div class="card shadow mb-4">
+    <div class="card-body">
+      <div class="row mb-4">
+        <div class="col-md-6">
+          <form method="get" class="d-flex align-items-center">
+            <label for="user_id" class="form-label me-2 mb-0">Filtrar por responsável:</label>
+            <select class="form-select me-2" id="user_id" name="user_id" onchange="updateFilterUrl(this)">
+              <option value="">Todos</option>
+              {% for membro in membros %}
+              <option value="{{ membro.id }}" {% if membro.id == filter_user_id %}selected{% endif %}>
+                {{ membro.nome }}
+              </option>
+              {% endfor %}
+            </select>
+          </form>
+        </div>
+      </div>
+
+      {% if tasks %}
+      <div class="table-responsive">
+        <table class="table table-hover">
+          <thead class="table-light">
+            <tr>
+              <th>Tarefa</th>
+              <th>Criada por</th>
+              <th>Atribuída para</th>
+              <th>Horário</th>
+              <th>Status</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for tarefa in tasks %}
+            <tr>
+              <td>
+                <strong>{{ tarefa.titulo }}</strong>
+                {% if tarefa.descricao %}
+                <br />
+                <small class="text-muted">{{ tarefa.descricao }}</small>
+                {% endif %}
+              </td>
+              <td>{{ tarefa.criador_nome }}</td>
+              <td>{{ tarefa.responsavel_nome }}</td>
+              <td>
+                {% if tarefa.horario %}
+                {{ tarefa.horario|datetime }}
+                {% else %}
+                <span class="text-muted">Não definido</span>
+                {% endif %}
+              </td>
+              <td>
+                {% if tarefa.status == 'concluida' %}
+                <span class="badge bg-success">Concluída</span>
+                {% elif tarefa.status == 'aprovada' %}
+                <span class="badge bg-primary">Em andamento</span>
+                {% elif tarefa.status == 'rejeitada' %}
+                <span class="badge bg-danger">Rejeitada</span>
+                {% elif tarefa.status == 'atrasada' %}
+                <span class="badge bg-danger">
+                  <i class="fas fa-clock me-1"></i>
+                  Atrasada
+                </span>
+                {% else %}
+                <span class="badge bg-warning text-dark">Aguardando aprovação</span>
+                {% endif %}
+              </td>
+              <td>
+                <div class="btn-group btn-group-sm">
+                  {% if tarefa.criador_id == session.get('user_id') or session.get('is_admin') %}
+                  <a href="{{ url_for('tarefas.edit_task', id=tarefa.id) }}" class="btn btn-info" title="Editar tarefa">
+                    <i class="fas fa-edit"></i>
+                  </a>
+                  {% endif %}
+                  {% if (tarefa.status == 'aprovada' or tarefa.status == 'atrasada') and tarefa.destinatario_id == session.get('user_id') %}
+                  <button type="button" class="btn btn-success" title="Marcar como concluída" data-bs-toggle="modal"
+                    data-bs-target="#completeModal{{ tarefa.id }}">
+                    <i class="fas fa-check"></i>
+                  </button>
+                  {% endif %}
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div class="alert alert-info">
+        <i class="fas fa-info-circle me-2"></i>
+        Nenhuma tarefa encontrada.
+      </div>
+      {% endif %}
     </div>
   </div>
-  {% endif %} {% if tasks %}
-  <div class="table-responsive">
-    <table class="table table-hover">
-      <thead class="table-light">
-        <tr>
-          <th>Tarefa</th>
-          <th>Criada por</th>
-          <th>Atribuída para</th>
-          <th>Horário</th>
-          <th>Status</th>
-          <th>Ações</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for tarefa in tasks %}
-        <tr>
-          <td>
-            <strong>{{ tarefa.titulo }}</strong>
-            {% if tarefa.descricao %}
-            <br />
-            <small class="text-muted">{{ tarefa.descricao }}</small>
-            {% endif %}
-          </td>
-          <td>{{ tarefa.criador_nome }}</td>
-          <td>{{ tarefa.responsavel_nome }}</td>
-          <td>
-            {% if tarefa.horario %} {{ tarefa.horario|datetime }} {% else %}
-            <span class="text-muted">Não definido</span>
-            {% endif %}
-          </td>
-          <td>
-            {% if tarefa.status == 'concluida' %}
-            <span class="badge bg-success">Concluída</span>
-            {% elif tarefa.status == 'aprovada' %}
-            <span class="badge bg-primary">Em andamento</span>
-            {% elif tarefa.status == 'rejeitada' %}
-            <span class="badge bg-danger">Rejeitada</span>
-            {% elif tarefa.status == 'atrasada' %}
-            <span class="badge bg-danger">
-              <i class="fas fa-clock me-1"></i>
-              Atrasada
-            </span>
-            {% else %}
-            <span class="badge bg-warning text-dark">Aguardando aprovação</span>
-            {% endif %}
-          </td>
-          <td>
-            <div class="btn-group btn-group-sm">
-              {% if tarefa.criador_id == session.get('user_id') or
-              session.get('is_admin') %}
-              <a
-                href="{{ url_for('tarefas.edit_task', id=tarefa.id) }}"
-                class="btn btn-info"
-                title="Editar tarefa"
-              >
-                <i class="fas fa-edit"></i>
-              </a>
-              {% endif %} {% if (tarefa.status == 'aprovada' or tarefa.status ==
-              'atrasada') and tarefa.destinatario_id == session.get('user_id')
-              %}
-              <button
-                type="button"
-                class="btn btn-success"
-                title="Marcar como concluída"
-                data-bs-toggle="modal"
-                data-bs-target="#completeModal{{ tarefa.id }}"
-              >
-                <i class="fas fa-check"></i>
-              </button>
-
-              <button
-                type="button"
-                class="btn btn-danger"
-                title="Rejeitar tarefa"
-                data-bs-toggle="modal"
-                data-bs-target="#rejectModal{{ tarefa.id }}"
-              >
-                <i class="fas fa-times"></i>
-              </button>
-              {% endif %} {% if session.get('is_admin') and tarefa.status ==
-              'pendente' %}
-              <form
-                method="POST"
-                action="{{ url_for('tarefas.approve_task', id=tarefa.id) }}"
-                class="d-inline"
-              >
-                <button
-                  type="submit"
-                  class="btn btn-primary"
-                  title="Aprovar tarefa"
-                >
-                  <i class="fas fa-thumbs-up"></i>
-                </button>
-              </form>
-              <form
-                method="POST"
-                action="{{ url_for('tarefas.reject_task', id=tarefa.id) }}"
-                class="d-inline"
-              >
-                <button
-                  type="submit"
-                  class="btn btn-danger"
-                  title="Rejeitar tarefa"
-                >
-                  <i class="fas fa-thumbs-down"></i>
-                </button>
-              </form>
-              {% endif %}
-            </div>
-
-            <!-- Modal de Conclusão -->
-            {% if (tarefa.status == 'aprovada' or tarefa.status == 'atrasada')
-            and tarefa.destinatario_id == session.get('user_id') %}
-            <div
-              class="modal fade"
-              id="completeModal{{ tarefa.id }}"
-              tabindex="-1"
-            >
-              <div class="modal-dialog">
-                <div class="modal-content">
-                  <div class="modal-header">
-                    <h5 class="modal-title">
-                      {% if tarefa.status == 'atrasada' %}
-                      <i class="fas fa-clock text-warning me-2"></i>
-                      Concluir Tarefa Atrasada {% else %}
-                      <i class="fas fa-check text-success me-2"></i>
-                      Concluir Tarefa {% endif %}
-                    </h5>
-                    <button
-                      type="button"
-                      class="btn-close"
-                      data-bs-dismiss="modal"
-                    ></button>
-                  </div>
-                  <form
-                    method="POST"
-                    action="{{ url_for('tarefas.complete_task', id=tarefa.id) }}"
-                  >
-                    <div class="modal-body">
-                      <p>
-                        {% if tarefa.status == 'atrasada' %} Você está
-                        concluindo uma tarefa atrasada: {% else %} Você está
-                        concluindo a tarefa: {% endif %}
-                        <strong>{{ tarefa.titulo }}</strong>
-                      </p>
-                      {% if tarefa.status == 'atrasada' %}
-                      <div class="mb-3">
-                        <label
-                          for="justificativa_atraso{{ tarefa.id }}"
-                          class="form-label"
-                        >
-                          Justificativa do Atraso
-                        </label>
-                        <textarea
-                          class="form-control"
-                          id="justificativa_atraso{{ tarefa.id }}"
-                          name="justificativa_atraso"
-                          rows="3"
-                          required
-                          placeholder="Por favor, explique o motivo do atraso..."
-                        ></textarea>
-                      </div>
-                      {% endif %}
-                    </div>
-                    <div class="modal-footer">
-                      <button
-                        type="button"
-                        class="btn btn-secondary"
-                        data-bs-dismiss="modal"
-                      >
-                        Cancelar
-                      </button>
-                      <button type="submit" class="btn btn-success">
-                        <i class="fas fa-check me-2"></i>
-                        Concluir Tarefa
-                      </button>
-                    </div>
-                  </form>
-                </div>
-              </div>
-            </div>
-
-            <!-- Modal de Rejeição -->
-            <div
-              class="modal fade"
-              id="rejectModal{{ tarefa.id }}"
-              tabindex="-1"
-            >
-              <div class="modal-dialog">
-                <div class="modal-content">
-                  <div class="modal-header">
-                    <h5 class="modal-title">
-                      <i class="fas fa-times-circle text-danger me-2"></i>
-                      Rejeitar Tarefa
-                    </h5>
-                    <button
-                      type="button"
-                      class="btn-close"
-                      data-bs-dismiss="modal"
-                    ></button>
-                  </div>
-                  <form
-                    method="POST"
-                    action="{{ url_for('tarefas.reject_task', id=tarefa.id) }}"
-                  >
-                    <div class="modal-body">
-                      <p>
-                        Você está rejeitando a tarefa:
-                        <strong>{{ tarefa.titulo }}</strong>
-                      </p>
-                      <div class="mb-3">
-                        <label
-                          for="justificativa{{ tarefa.id }}"
-                          class="form-label"
-                        >
-                          Justificativa
-                        </label>
-                        <textarea
-                          class="form-control"
-                          id="justificativa{{ tarefa.id }}"
-                          name="justificativa"
-                          rows="3"
-                          required
-                          placeholder="Por favor, explique o motivo da rejeição..."
-                        ></textarea>
-                      </div>
-                    </div>
-                    <div class="modal-footer">
-                      <button
-                        type="button"
-                        class="btn btn-secondary"
-                        data-bs-dismiss="modal"
-                      >
-                        Cancelar
-                      </button>
-                      <button type="submit" class="btn btn-danger">
-                        <i class="fas fa-times me-2"></i>
-                        Rejeitar Tarefa
-                      </button>
-                    </div>
-                  </form>
-                </div>
-              </div>
-            </div>
-            {% endif %}
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
-  {% else %}
-  <div class="alert alert-info" role="alert">
-    <i class="fas fa-info-circle me-2"></i>
-    Nenhuma tarefa encontrada.
-  </div>
-  {% endif %}
 </div>
 
-{% block extra_js %}
-<script>
-  document
-    .getElementById('showAllTasks')
-    .addEventListener('change', function () {
-      window.location.href =
-        "{{ url_for('tarefas.list_tasks', all='true' if not show_all else 'false') }}";
-    });
-</script>
-{% endblock %} {% endblock %}
+{% for tarefa in tasks %}
+{% if tarefa.status == 'aprovada' or tarefa.status == 'atrasada' %}
+<!-- Modal de Conclusão -->
+<div class="modal fade" id="completeModal{{ tarefa.id }}" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Concluir Tarefa</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form action="{{ url_for('tarefas.complete_task', id=tarefa.id) }}" method="post">
+        <div class="modal-body">
+          <p>Você está marcando como concluída a tarefa:</p>
+          <p class="fw-bold">{{ tarefa.titulo }}</p>
+
+          {% if tarefa.status == 'atrasada' %}
+          <div class="mb-3">
+            <label for="justificativa{{ tarefa.id }}" class="form-label">Justificativa do Atraso</label>
+            <textarea class="form-control" id="justificativa{{ tarefa.id }}" name="justificativa" rows="3"
+              required></textarea>
+          </div>
+          {% endif %}
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-success">
+            <i class="fas fa-check me-2"></i>
+            Confirmar Conclusão
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endif %}
+{% endfor %}
+{% endblock %}

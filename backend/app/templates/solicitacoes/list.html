@@ -36,19 +36,41 @@ content %}
           <td>{{ solicitacao.solicitante_nome }}</td>
           {% endif %}
           <td>
-            {% if solicitacao.tipo == 'alteracao_dados' %}
+            {% if solicitacao.tipo_item == 'alteracao_dados' %}
             <span class="badge bg-info">Alteração de Dados</span>
+            {% else %}
+            <span class="badge bg-warning text-dark">Tarefa Pendente</span>
             {% endif %}
           </td>
           <td>
-            {% set detalhes = solicitacao.detalhes|from_json %}
+            {% if solicitacao.tipo_item == 'alteracao_dados' %} {% set detalhes
+            = solicitacao.detalhes|from_json %}
             <ul class="list-unstyled mb-0">
               {% if detalhes.novo_nome %}
               <li><strong>Novo Nome:</strong> {{ detalhes.novo_nome }}</li>
-              {% endif %} {% if detalhes.nova_senha %}
-              <li><strong>Nova Senha:</strong> Solicitada</li>
               {% endif %}
             </ul>
+            {% else %} {% set detalhes = solicitacao.detalhes|from_json %}
+            <div>
+              <strong>{{ detalhes.titulo }}</strong>
+              {% if detalhes.descricao %}
+              <br />
+              <small class="text-muted">{{ detalhes.descricao }}</small>
+              {% endif %}
+              <br />
+              <small class="text-primary">
+                <i class="fas fa-user me-1"></i>
+                Atribuída para: {{ detalhes.destinatario_nome }}
+              </small>
+              {% if detalhes.horario %}
+              <br />
+              <small class="text-info">
+                <i class="fas fa-clock me-1"></i>
+                Prazo: {{ detalhes.horario|datetime }}
+              </small>
+              {% endif %}
+            </div>
+            {% endif %}
           </td>
           <td>
             {% if solicitacao.status == 'pendente' %}
@@ -62,6 +84,7 @@ content %}
           {% if session.get('is_admin') and solicitacao.status == 'pendente' %}
           <td>
             <div class="btn-group" role="group">
+              {% if solicitacao.tipo_item == 'alteracao_dados' %}
               <form
                 method="POST"
                 action="{{ url_for('solicitacoes.approve_request', id=solicitacao.id) }}"
@@ -88,6 +111,30 @@ content %}
                   <i class="fas fa-times"></i>
                 </button>
               </form>
+              {% else %}
+              <form
+                method="POST"
+                action="{{ url_for('tarefas.approve_task', id=solicitacao.id) }}"
+                class="d-inline"
+              >
+                <button
+                  type="submit"
+                  class="btn btn-success btn-sm"
+                  title="Aprovar Tarefa"
+                >
+                  <i class="fas fa-check"></i>
+                </button>
+              </form>
+              <button
+                type="button"
+                class="btn btn-danger btn-sm"
+                title="Rejeitar Tarefa"
+                data-bs-toggle="modal"
+                data-bs-target="#rejectTaskModal{{ solicitacao.id }}"
+              >
+                <i class="fas fa-times"></i>
+              </button>
+              {% endif %}
             </div>
           </td>
           {% endif %}
@@ -103,4 +150,67 @@ content %}
   </div>
   {% endif %}
 </div>
-{% endblock %}
+
+<!-- Modais de Rejeição de Tarefas -->
+{% for solicitacao in solicitacoes %} {% if solicitacao.tipo_item == 'tarefa'
+and session.get('is_admin') and solicitacao.status == 'pendente' %}
+<div
+  class="modal fade"
+  id="rejectTaskModal{{ solicitacao.id }}"
+  tabindex="-1"
+  aria-hidden="true"
+>
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          <i class="fas fa-times-circle text-danger me-2"></i>
+          Rejeitar Tarefa
+        </h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+      <form
+        action="{{ url_for('tarefas.reject_task', id=solicitacao.id) }}"
+        method="post"
+      >
+        <div class="modal-body">
+          {% set detalhes = solicitacao.detalhes|from_json %}
+          <p>Você está rejeitando a tarefa:</p>
+          <p class="fw-bold">{{ detalhes.titulo }}</p>
+          <div class="mb-3">
+            <label for="justificativa{{ solicitacao.id }}" class="form-label"
+              >Justificativa</label
+            >
+            <textarea
+              class="form-control"
+              id="justificativa{{ solicitacao.id }}"
+              name="justificativa"
+              rows="3"
+              required
+              placeholder="Por favor, explique o motivo da rejeição..."
+            ></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            data-bs-dismiss="modal"
+          >
+            Cancelar
+          </button>
+          <button type="submit" class="btn btn-danger">
+            <i class="fas fa-times me-2"></i>
+            Rejeitar Tarefa
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endif %} {% endfor %} {% endblock %}

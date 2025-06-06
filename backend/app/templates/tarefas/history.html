@@ -3,7 +3,10 @@ block content %}
 <div class="container">
   <div class="row mb-4">
     <div class="col">
-      <h2 class="mb-3">Histórico de Tarefas</h2>
+      <h2>
+        <i class="fas fa-history text-primary me-2"></i>
+        Histórico de Tarefas
+      </h2>
     </div>
     <div class="col-auto">
       <a
@@ -18,121 +21,133 @@ block content %}
 
   <div class="card shadow mb-4">
     <div class="card-body">
-      <h5 class="card-title mb-3">
-        <i class="fas fa-filter me-2"></i>
-        Filtrar por Status
-      </h5>
-      <div class="btn-group mb-3" role="group">
-        <a
-          href="{{ url_for('tarefas.history', status='all') }}"
-          class="btn btn-outline-secondary {% if current_status == 'all' %}active{% endif %}"
-        >
-          Todas
-        </a>
-        <a
-          href="{{ url_for('tarefas.history', status='pendentes') }}"
-          class="btn btn-outline-warning {% if current_status == 'pendentes' %}active{% endif %}"
-        >
-          Pendentes
-        </a>
-        <a
-          href="{{ url_for('tarefas.history', status='atrasadas') }}"
-          class="btn btn-outline-danger {% if current_status == 'atrasadas' %}active{% endif %}"
-        >
-          <i class="fas fa-clock me-1"></i>
-          Atrasadas
-        </a>
-        <a
-          href="{{ url_for('tarefas.history', status='rejeitadas') }}"
-          class="btn btn-outline-danger {% if current_status == 'rejeitadas' %}active{% endif %}"
-        >
-          Rejeitadas
-        </a>
-        <a
-          href="{{ url_for('tarefas.history', status='concluidas') }}"
-          class="btn btn-outline-success {% if current_status == 'concluidas' %}active{% endif %}"
-        >
-          Concluídas
-        </a>
+      <div class="row mb-4">
+        <div class="col-md-6 mb-3 mb-md-0">
+          <form method="get" class="d-flex align-items-center">
+            <label class="form-label me-2 mb-0">Status:</label>
+            <select class="form-select me-2" name="status" onchange="this.form.submit()">
+              <option value="all" {% if current_status == 'all' %}selected{% endif %}>Todos</option>
+              <option value="concluidas" {% if current_status == 'concluidas' %}selected{% endif %}>Concluídas</option>
+              <option value="rejeitadas" {% if current_status == 'rejeitadas' %}selected{% endif %}>Rejeitadas</option>
+              <option value="atrasadas" {% if current_status == 'atrasadas' %}selected{% endif %}>Atrasadas</option>
+              <option value="pendentes" {% if current_status == 'pendentes' %}selected{% endif %}>Pendentes</option>
+            </select>
+
+            <label class="form-label me-2 mb-0">Membro:</label>
+            <select class="form-select" name="user_id" onchange="this.form.submit()">
+              <option value="">Todos</option>
+              {% for membro in membros %}
+              <option value="{{ membro.id }}" {% if membro.id == current_user_filter %}selected{% endif %}>
+                {{ membro.nome }}
+              </option>
+              {% endfor %}
+            </select>
+          </form>
+        </div>
       </div>
+
+      {% if tasks %}
+      <div class="table-responsive">
+        <table class="table table-hover">
+          <thead class="table-light">
+            <tr>
+              <th>Tarefa</th>
+              <th>Criada por</th>
+              <th>Atribuída para</th>
+              <th>Prazo</th>
+              <th>Status</th>
+              <th>Última Atualização</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for tarefa in tasks %}
+            <tr>
+              <td>
+                <strong>{{ tarefa.titulo }}</strong>
+                {% if tarefa.descricao %}
+                <br>
+                <small class="text-muted">{{ tarefa.descricao }}</small>
+                {% endif %}
+                {% if tarefa.justificativa %}
+                <br>
+                {% if tarefa.status == 'rejeitada' %}
+                <small class="text-danger">
+                  <i class="fas fa-info-circle me-1"></i>
+                  Motivo da rejeição: {{ tarefa.justificativa }}
+                </small>
+                {% elif tarefa.status == 'concluida' and tarefa.justificativa %}
+                <small class="text-warning">
+                  <i class="fas fa-clock me-1"></i>
+                  Justificativa do atraso: {{ tarefa.justificativa }}
+                </small>
+                {% endif %}
+                {% endif %}
+              </td>
+              <td>{{ tarefa.criador_nome }}</td>
+              <td>{{ tarefa.responsavel_nome }}</td>
+              <td>
+                {% if tarefa.horario %}
+                {{ tarefa.horario|datetime }}
+                {% else %}
+                <span class="text-muted">Não definido</span>
+                {% endif %}
+              </td>
+              <td>
+                {% if tarefa.status == 'concluida' %}
+                <span class="badge bg-success">Concluída</span>
+                {% elif tarefa.status == 'rejeitada' %}
+                <span class="badge bg-danger">Rejeitada</span>
+                {% elif tarefa.status == 'atrasada' %}
+                <span class="badge bg-danger">
+                  <i class="fas fa-clock me-1"></i>
+                  Atrasada
+                </span>
+                {% elif tarefa.status == 'pendente' %}
+                <span class="badge bg-warning text-dark">Aguardando aprovação</span>
+                {% endif %}
+              </td>
+              <td>
+                {% if tarefa.updated_at %}
+                {{ tarefa.updated_at|datetime }}
+                {% else %}
+                {{ tarefa.created_at|datetime }}
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div class="alert alert-info">
+        <i class="fas fa-info-circle me-2"></i>
+        Nenhuma tarefa encontrada com os filtros selecionados.
+      </div>
+      {% endif %}
     </div>
   </div>
-
-  {% if tasks %}
-  <div class="table-responsive">
-    <table class="table table-hover">
-      <thead class="table-light">
-        <tr>
-          <th>Tarefa</th>
-          <th>Criada por</th>
-          <th>Atribuída para</th>
-          <th>Horário</th>
-          <th>Status</th>
-          <th>Data</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for tarefa in tasks %}
-        <tr>
-          <td>
-            <strong>{{ tarefa.titulo }}</strong>
-            {% if tarefa.descricao %}
-            <br />
-            <small class="text-muted">{{ tarefa.descricao }}</small>
-            {% endif %} {% if tarefa.justificativa %}
-            <br />
-            {% if tarefa.status == 'rejeitada' %}
-            <small class="text-danger">
-              <i class="fas fa-info-circle me-1"></i>
-              Justificativa da rejeição: {{ tarefa.justificativa }}
-            </small>
-            {% elif tarefa.status == 'concluida' and tarefa.justificativa %}
-            <small class="text-warning">
-              <i class="fas fa-clock me-1"></i>
-              Justificativa do atraso: {{ tarefa.justificativa }}
-            </small>
-            {% endif %} {% endif %}
-          </td>
-          <td>{{ tarefa.criador_nome }}</td>
-          <td>{{ tarefa.responsavel_nome }}</td>
-          <td>
-            {% if tarefa.horario %} {{ tarefa.horario|datetime }} {% else %}
-            <span class="text-muted">Não definido</span>
-            {% endif %}
-          </td>
-          <td>
-            {% if tarefa.status == 'concluida' %}
-            <span class="badge bg-success">Concluída</span>
-            {% elif tarefa.status == 'aprovada' %}
-            <span class="badge bg-primary">Em andamento</span>
-            {% elif tarefa.status == 'rejeitada' %}
-            <span class="badge bg-danger">Rejeitada</span>
-            {% elif tarefa.status == 'atrasada' %}
-            <span class="badge bg-danger">
-              <i class="fas fa-clock me-1"></i>
-              Atrasada
-            </span>
-            {% else %}
-            <span class="badge bg-warning text-dark">Pendente</span>
-            {% endif %}
-          </td>
-          <td>
-            <small>
-              Criada: {{ tarefa.created_at|datetime }}<br />
-              {% if tarefa.updated_at %} Atualizada: {{
-              tarefa.updated_at|datetime }} {% endif %}
-            </small>
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
-  {% else %}
-  <div class="alert alert-info" role="alert">
-    <i class="fas fa-info-circle me-2"></i>
-    Nenhuma tarefa encontrada com os filtros selecionados.
-  </div>
-  {% endif %}
 </div>
+
+{% block extra_js %}
+<script>
+  // Mantém os filtros ao trocar de página
+  document.querySelectorAll('select[name]').forEach(select => {
+    select.addEventListener('change', function() {
+      const form = this.form;
+      const otherSelects = form.querySelectorAll('select[name]');
+      const params = new URLSearchParams(window.location.search);
+      
+      otherSelects.forEach(otherSelect => {
+        if (otherSelect.value) {
+          params.set(otherSelect.name, otherSelect.value);
+        } else {
+          params.delete(otherSelect.name);
+        }
+      });
+      
+      window.location.href = `${window.location.pathname}?${params.toString()}`;
+    });
+  });
+</script>
+{% endblock %}
 {% endblock %}
