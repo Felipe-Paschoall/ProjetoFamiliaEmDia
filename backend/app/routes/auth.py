@@ -9,6 +9,36 @@ def login_required(view):
     def wrapped_view(*args, **kwargs):
         if 'user_id' not in session:
             return redirect(url_for('auth.login'))
+            
+        db = current_app.get_db()
+        
+        # Verificar se a sessão foi invalidada (usuário removido)
+        sessao_invalida = db.execute(
+            'SELECT 1 FROM sessoes_invalidas WHERE user_id = ?', 
+            (session['user_id'],)
+        ).fetchone()
+        
+        if sessao_invalida:
+            session.clear()
+            flash('Sua conta foi removida da família. Contate um administrador.', 'error')
+            return redirect(url_for('auth.login'))
+            
+        # Verificar alteração de status de admin
+        user = db.execute('SELECT first_login FROM usuario WHERE id = ?', 
+                         (session['user_id'],)).fetchone()
+        if user is None:  # Usuário não existe mais
+            session.clear()
+            flash('Sua conta foi removida da família. Contate um administrador.', 'error')
+            return redirect(url_for('auth.login'))
+            
+        if user and user['first_login'] == 2:  # Status de admin alterado
+            user_id = session['user_id']
+            session.clear()
+            flash('Seu status de administrador foi alterado. Faça login novamente.', 'warning')
+            db.execute('UPDATE usuario SET first_login = 0 WHERE id = ?', (user_id,))
+            db.commit()
+            return redirect(url_for('auth.login'))
+            
         return view(*args, **kwargs)
     return wrapped_view
 
@@ -32,6 +62,8 @@ def login():
         
         if user is None:
             error = 'CPF não encontrado.'
+        elif user['first_login'] and senha != 'senha123':
+            error = 'No primeiro acesso, use a senha padrão: senha123'
         elif not user['first_login'] and not check_password_hash(user['password'], senha):
             error = 'Senha incorreta.'
             
@@ -41,6 +73,7 @@ def login():
             session['family_id'] = user['familia_id']
             session['is_admin'] = bool(user['is_admin'])
             session['first_login'] = bool(user['first_login'])
+            session['user_nome'] = user['nome']
             
             if user['first_login']:
                 return redirect(url_for('auth.change_password'))

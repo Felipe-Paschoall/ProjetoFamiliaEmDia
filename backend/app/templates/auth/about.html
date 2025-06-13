@@ -119,7 +119,7 @@
                     <li>
                       <strong>tarefa</strong>: id, familia_id (FK), criador_id
                       (FK), destinatario_id (FK), titulo, descricao, horario,
-                      status, created_at, updated_at
+                      status, justificativa, created_at, updated_at
                     </li>
                     <li>
                       <strong>solicitacao</strong>: id, usuario_id (FK), tipo,
@@ -138,6 +138,35 @@
                     </li>
                     <li>
                       Uma <strong>solicitação</strong> pertence a um usuário.
+                    </li>
+                  </ul>
+                  <hr />
+                  <h6 class="fw-bold">Status de Tarefas</h6>
+                  <ul>
+                    <li>
+                      <strong>pendente</strong>: Aguardando aprovação do
+                      administrador
+                    </li>
+                    <li><strong>aprovada</strong>: Tarefa em andamento</li>
+                    <li><strong>atrasada</strong>: Tarefa com prazo vencido</li>
+                    <li><strong>concluida</strong>: Tarefa finalizada</li>
+                    <li>
+                      <strong>rejeitada</strong>: Tarefa não aprovada pelo
+                      administrador
+                    </li>
+                  </ul>
+                  <p class="mb-1">Observações:</p>
+                  <ul>
+                    <li>
+                      Tarefas atrasadas exigem justificativa ao serem concluídas
+                    </li>
+                    <li>
+                      Administradores podem aprovar ou rejeitar tarefas
+                      pendentes
+                    </li>
+                    <li>
+                      O status "atrasada" é atualizado automaticamente ao
+                      verificar prazos
                     </li>
                   </ul>
                   <hr />

@@ -85,7 +85,23 @@ block content %}
                   <i class="fas fa-trash"></i>
                 </button>
               </form>
-              {% endif %} {% endif %}
+              {% endif %} {% endif %} {% if member.id == session.get('user_id')
+              %}
+              <a
+                href="{{ url_for('familia.edit_profile') }}"
+                class="btn btn-info btn-sm"
+                title="Editar nome"
+              >
+                <i class="fas fa-edit"></i>
+              </a>
+              <a
+                href="{{ url_for('auth.change_password') }}"
+                class="btn btn-warning btn-sm"
+                title="Alterar senha"
+              >
+                <i class="fas fa-key"></i>
+              </a>
+              {% endif %}
             </div>
             {% else %} {% if member.id == session.get('user_id') %}
             <div class="btn-group">

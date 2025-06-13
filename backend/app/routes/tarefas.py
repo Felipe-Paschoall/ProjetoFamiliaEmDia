@@ -127,13 +127,12 @@ def history():
     
     # Define as condições de status
     status_conditions = {
-        'pendentes': "t.status = 'pendente'",
         'atrasadas': "t.status = 'atrasada'",
         'rejeitadas': "t.status = 'rejeitada'",
         'concluidas': "t.status = 'concluida'",
-        'all': "1=1"
+        'all': "t.status IN ('concluida', 'rejeitada', 'atrasada')"
     }
-    status_condition = status_conditions.get(status_filter, "1=1")
+    status_condition = status_conditions.get(status_filter, "t.status IN ('concluida', 'rejeitada', 'atrasada')")
     
     # Monta a query base
     base_query = f'''

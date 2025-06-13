@@ -106,6 +106,10 @@
                     data-bs-target="#completeModal{{ tarefa.id }}">
                     <i class="fas fa-check"></i>
                   </button>
+                  <button type="button" class="btn btn-danger" title="Recusar tarefa" data-bs-toggle="modal"
+                    data-bs-target="#rejectModal{{ tarefa.id }}">
+                    <i class="fas fa-times"></i>
+                  </button>
                   {% endif %}
                 </div>
               </td>
@@ -152,6 +156,40 @@
           <button type="submit" class="btn btn-success">
             <i class="fas fa-check me-2"></i>
             Confirmar Conclusão
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+{% if tarefa.status == 'aprovada' or tarefa.status == 'atrasada' %}
+<!-- Modal de Recusa -->
+<div class="modal fade" id="rejectModal{{ tarefa.id }}" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Recusar Tarefa</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form action="{{ url_for('tarefas.reject_task', id=tarefa.id) }}" method="post">
+        <div class="modal-body">
+          <p>Você está recusando a tarefa:</p>
+          <p class="fw-bold">{{ tarefa.titulo }}</p>
+
+          <div class="mb-3">
+            <label for="justificativa{{ tarefa.id }}" class="form-label">Justificativa da Recusa</label>
+            <textarea class="form-control" id="justificativa{{ tarefa.id }}" name="justificativa" rows="3"
+              required></textarea>
+            <div class="form-text">Por favor, explique o motivo da recusa.</div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-danger">
+            <i class="fas fa-times me-2"></i>
+            Confirmar Recusa
           </button>
         </div>
       </form>

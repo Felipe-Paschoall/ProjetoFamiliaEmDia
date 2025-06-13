@@ -5,8 +5,8 @@ def init_db():
     # Obtém o caminho do banco de dados
     db_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'BancoDeDados', 'familia.db')
     
-    # Obtém o caminho do schema
-    schema_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'BancoDeDados', 'schema.sql')
+    # Obtém o caminho do schema (agora da pasta app)
+    schema_path = os.path.join(os.path.dirname(__file__), 'app', 'schema.sql')
     
     # Remove o banco de dados se ele existir
     if os.path.exists(db_path):

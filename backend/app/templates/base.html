@@ -32,10 +32,17 @@
   </head>
   <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-      <div class="container">
-        <a class="navbar-brand" href="{{ url_for('main.index') }}"
-          >Família em Dia</a
-        >
+      <div class="container d-flex align-items-center justify-content-between">
+        <div class="d-flex align-items-center">
+          <a class="navbar-brand me-3" href="{{ url_for('main.index') }}">
+            Família em Dia
+          </a>
+          {% if session.get('user_id') %}
+          <span class="text-white fw-bold"
+            >{{ session.get('user_nome', '') }}</span
+          >
+          {% endif %}
+        </div>
         <button
           class="navbar-toggler"
           type="button"

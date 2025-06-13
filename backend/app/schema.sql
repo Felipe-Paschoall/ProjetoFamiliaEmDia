@@ -2,6 +2,7 @@ DROP TABLE IF EXISTS familia;
 DROP TABLE IF EXISTS usuario;
 DROP TABLE IF EXISTS tarefa;
 DROP TABLE IF EXISTS solicitacao;
+DROP TABLE IF EXISTS sessoes_invalidas;
 
 CREATE TABLE familia (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -30,6 +31,7 @@ CREATE TABLE tarefa (
   descricao TEXT,
   horario DATETIME,
   status TEXT NOT NULL DEFAULT 'pendente',
+  justificativa TEXT,
   created_at TIMESTAMP NOT NULL DEFAULT (datetime('now', '-3 hours')),
   updated_at TIMESTAMP,
   FOREIGN KEY (familia_id) REFERENCES familia (id),
@@ -46,4 +48,9 @@ CREATE TABLE solicitacao (
   created_at TIMESTAMP NOT NULL DEFAULT (datetime('now', '-3 hours')),
   updated_at TIMESTAMP,
   FOREIGN KEY (usuario_id) REFERENCES usuario (id)
+);
+
+CREATE TABLE sessoes_invalidas (
+  user_id INTEGER PRIMARY KEY,
+  invalidated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ); 

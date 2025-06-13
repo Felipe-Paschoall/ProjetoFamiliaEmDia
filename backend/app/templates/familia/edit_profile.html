@@ -1,0 +1,51 @@
+{% extends "base.html" %} {% block title %}Editar Perfil{% endblock %} {% block
+content %}
+<div class="container">
+  <div class="row justify-content-center">
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header bg-primary text-white">
+          <h5 class="card-title mb-0">
+            <i class="fas fa-user-edit me-2"></i>
+            Editar Perfil
+          </h5>
+        </div>
+        <div class="card-body">
+          <form method="POST">
+            <div class="mb-3">
+              <label for="novo_nome" class="form-label">Nome</label>
+              <div class="input-group">
+                <span class="input-group-text">
+                  <i class="fas fa-user"></i>
+                </span>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="novo_nome"
+                  name="novo_nome"
+                  value="{{ user.nome }}"
+                  required
+                />
+              </div>
+            </div>
+
+            <div class="d-grid gap-2">
+              <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save me-2"></i>
+                Salvar Alterações
+              </button>
+              <a
+                href="{{ url_for('familia.list_members') }}"
+                class="btn btn-secondary"
+              >
+                <i class="fas fa-arrow-left me-2"></i>
+                Voltar
+              </a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
