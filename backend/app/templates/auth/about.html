@@ -219,6 +219,53 @@
                       <code>/solicitacoes/&lt;id&gt;/reject</code> (POST)
                     </li>
                   </ul>
+                  <h6 class="fw-bold">
+                    Principais Funcionalidades e Endpoints
+                  </h6>
+                  <ul>
+                    <li>
+                      <strong
+                        >Sincronização automática do nome do usuário:</strong
+                      >
+                      O nome exibido no topo é atualizado automaticamente após
+                      qualquer alteração aprovada, sem necessidade de logout.
+                    </li>
+                    <li>
+                      <strong>Exclusão de membros:</strong> Apenas
+                      administradores podem excluir membros, com modal de
+                      confirmação e invalidação imediata da sessão do usuário
+                      removido.
+                    </li>
+                    <li>
+                      <strong>Exclusão de tarefas:</strong> Apenas
+                      administradores podem excluir tarefas, sempre com
+                      confirmação.
+                    </li>
+                    <li>
+                      <strong>Solicitações de alteração de nome:</strong>
+                      Usuários podem solicitar alteração de nome, que só é
+                      efetivada após aprovação do administrador.
+                    </li>
+                    <li>
+                      <strong>Status detalhado das tarefas:</strong> Tarefas
+                      podem estar como pendente, aprovada, atrasada, concluída
+                      ou rejeitada. Justificativas são obrigatórias para atrasos
+                      e rejeições.
+                    </li>
+                    <li>
+                      <strong>Controle de sessões inválidas:</strong> Ao remover
+                      um membro, todas as sessões ativas desse usuário são
+                      invalidadas imediatamente.
+                    </li>
+                    <li>
+                      <strong
+                        >Rotas de inicialização e carga de dados de
+                        teste:</strong
+                      >
+                      Endpoints especiais para inicializar o banco de dados e
+                      carregar dados de teste rapidamente.
+                    </li>
+                  </ul>
                 </div>
               </div>
             </div>
