@@ -56,4 +56,14 @@ def create_app(config_name='default'):
     def from_json(value):
         return json.loads(value) if value else {}
     
+    # Sincroniza o nome do usuário na sessão antes de cada requisição
+    @app.before_request
+    def sync_user_nome():
+        from flask import session, current_app
+        if 'user_id' in session:
+            db = current_app.get_db()
+            user = db.execute('SELECT nome FROM usuario WHERE id = ?', (session['user_id'],)).fetchone()
+            if user and session.get('user_nome') != user['nome']:
+                session['user_nome'] = user['nome']
+    
     return app 

@@ -134,6 +134,9 @@ def approve_request(id):
             'UPDATE usuario SET nome = ? WHERE id = ?',
             (detalhes['novo_nome'], solicitacao['user_id'])
         )
+        # Se o usuário que está logado for o mesmo que teve o nome alterado, atualiza a sessão
+        if solicitacao['user_id'] == session.get('user_id'):
+            session['user_nome'] = detalhes['novo_nome']
     
     db.execute(
         "UPDATE solicitacao SET status = 'aprovado' WHERE id = ?",
