@@ -239,7 +239,7 @@ block content %}
                 type="password"
                 class="form-control"
                 id="senha_atual"
-                name="senha_atual"
+                name="current_password"
                 required
               />
             </div>
@@ -255,7 +255,7 @@ block content %}
                 type="password"
                 class="form-control"
                 id="nova_senha"
-                name="nova_senha"
+                name="new_password"
                 required
                 minlength="6"
               />
@@ -266,7 +266,7 @@ block content %}
           </div>
 
           <div class="mb-3">
-            <label for="confirma_senha" class="form-label"
+            <label for="confirmar_senha" class="form-label"
               >Confirmar Nova Senha</label
             >
             <div class="input-group">
@@ -276,8 +276,8 @@ block content %}
               <input
                 type="password"
                 class="form-control"
-                id="confirma_senha"
-                name="confirma_senha"
+                id="confirmar_senha"
+                name="confirm_password"
                 required
                 minlength="6"
               />
@@ -306,12 +306,12 @@ block content %}
 <script>
   // Validação de senha em tempo real
   document
-    .getElementById('confirma_senha')
+    .getElementById('confirmar_senha')
     .addEventListener('input', function () {
-      const novaSenha = document.getElementById('nova_senha').value;
-      const confirmaSenha = this.value;
+      const newPassword = document.getElementById('nova_senha').value;
+      const confirmPassword = this.value;
 
-      if (novaSenha !== confirmaSenha) {
+      if (newPassword !== confirmPassword) {
         this.setCustomValidity('As senhas não coincidem');
       } else {
         this.setCustomValidity('');
@@ -319,12 +319,12 @@ block content %}
     });
 
   document.getElementById('nova_senha').addEventListener('input', function () {
-    const confirmaSenha = document.getElementById('confirma_senha');
-    if (confirmaSenha.value) {
-      if (this.value !== confirmaSenha.value) {
-        confirmaSenha.setCustomValidity('As senhas não coincidem');
+    const confirmPassword = document.getElementById('confirmar_senha');
+    if (confirmPassword.value) {
+      if (this.value !== confirmPassword.value) {
+        confirmPassword.setCustomValidity('As senhas não coincidem');
       } else {
-        confirmaSenha.setCustomValidity('');
+        confirmPassword.setCustomValidity('');
       }
     }
   });

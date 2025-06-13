@@ -61,11 +61,11 @@ def login():
         user = db.execute('SELECT * FROM usuario WHERE cpf = ?', (cpf,)).fetchone()
         
         if user is None:
-            error = 'CPF não encontrado.'
+            error = 'Credenciais inválidas.'
         elif user['first_login'] and senha != 'senha123':
             error = 'No primeiro acesso, use a senha padrão: senha123'
         elif not user['first_login'] and not check_password_hash(user['password'], senha):
-            error = 'Senha incorreta.'
+            error = 'Credenciais inválidas.'
             
         if error is None:
             session.clear()
