@@ -43,6 +43,12 @@ block content %}
             </select>
           </form>
         </div>
+        <div class="col-md-6 text-md-end">
+          <a href="{{ url_for('tarefas.export_tasks', status=current_status, user_id=current_user_filter) }}" class="btn btn-success">
+            <i class="fas fa-file-export me-2"></i>
+            Exportar Tarefas
+          </a>
+        </div>
       </div>
 
       {% if tasks %}

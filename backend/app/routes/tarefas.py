@@ -1,6 +1,7 @@
-from flask import Blueprint, request, session, redirect, url_for, render_template, current_app, flash
+from flask import Blueprint, request, session, redirect, url_for, render_template, current_app, flash, make_response
 from .auth import login_required, admin_required
 from datetime import datetime
+import json
 
 bp = Blueprint('tarefas', __name__, url_prefix='/tarefas')
 
@@ -440,4 +441,66 @@ def delete_task(id):
         db.commit()
         flash('Tarefa excluída com sucesso.', 'success')
     
-    return redirect(url_for('tarefas.list_tasks')) 
+    return redirect(url_for('tarefas.list_tasks'))
+
+@bp.route('/export')
+@login_required
+def export_tasks():
+    db = current_app.get_db()
+    
+    # Obtém os filtros da URL
+    status_filter = request.args.get('status', 'all')
+    user_filter = request.args.get('user_id', type=int)
+    
+    # Define as condições de status
+    status_conditions = {
+        'atrasadas': "t.status = 'atrasada'",
+        'rejeitadas': "t.status = 'rejeitada'",
+        'concluidas': "t.status = 'concluida'",
+        'all': "t.status IN ('concluida', 'rejeitada', 'atrasada')"
+    }
+    status_condition = status_conditions.get(status_filter, "t.status IN ('concluida', 'rejeitada', 'atrasada')")
+    
+    # Monta a query base
+    base_query = f'''
+        SELECT 
+            t.*,
+            u1.nome as criador_nome,
+            u2.nome as responsavel_nome,
+            datetime(t.created_at, '-3 hours') as created_at,
+            datetime(t.updated_at, '-3 hours') as updated_at
+        FROM tarefa t
+        JOIN usuario u1 ON t.criador_id = u1.id
+        JOIN usuario u2 ON t.destinatario_id = u2.id
+        WHERE t.familia_id = ? 
+        AND {status_condition}
+    '''
+    
+    # Adiciona filtro por usuário se especificado
+    params = [session['family_id']]
+    if user_filter:
+        base_query += ' AND (t.criador_id = ? OR t.destinatario_id = ?)'
+        params.extend([user_filter, user_filter])
+    
+    # Adiciona ordenação
+    base_query += '''
+        ORDER BY t.updated_at DESC NULLS LAST, t.created_at DESC
+    '''
+    
+    # Executa a query
+    tasks = db.execute(base_query, params).fetchall()
+    
+    # Converte as tarefas para um formato JSON
+    tasks_json = []
+    for task in tasks:
+        task_dict = dict(task)
+        # Remove campos que não queremos exportar
+        task_dict.pop('_sa_instance_state', None)
+        tasks_json.append(task_dict)
+    
+    # Cria a resposta com o arquivo JSON
+    response = make_response(json.dumps(tasks_json, ensure_ascii=False))
+    response.headers['Content-Type'] = 'application/json'
+    response.headers['Content-Disposition'] = f'attachment; filename=tarefas_{datetime.now().strftime("%Y%m%d_%H%M%S")}.json'
+    
+    return response 
