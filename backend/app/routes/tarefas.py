@@ -420,4 +420,24 @@ def edit_task(id):
         (session['family_id'],)
     ).fetchall()
     
-    return render_template('tarefas/edit.html', task=task, membros=membros) 
+    return render_template('tarefas/edit.html', task=task, membros=membros)
+
+@bp.route('/<int:id>/delete', methods=['POST'])
+@admin_required
+def delete_task(id):
+    db = current_app.get_db()
+    
+    # Verifica se a tarefa pertence à família do admin
+    task = db.execute('''
+        SELECT t.* FROM tarefa t
+        WHERE t.id = ? AND t.familia_id = ?
+    ''', (id, session['family_id'])).fetchone()
+    
+    if task is None:
+        flash('Tarefa não encontrada.', 'error')
+    else:
+        db.execute('DELETE FROM tarefa WHERE id = ?', (id,))
+        db.commit()
+        flash('Tarefa excluída com sucesso.', 'success')
+    
+    return redirect(url_for('tarefas.list_tasks')) 

@@ -71,20 +71,15 @@ block content %}
                 </button>
               </form>
               {% if not member.is_admin %}
-              <form
-                method="POST"
-                action="{{ url_for('familia.delete_member', id=member.id) }}"
-                class="d-inline"
-                onsubmit="return confirm('Tem certeza que deseja remover este membro?');"
+              <button
+                type="button"
+                class="btn btn-danger btn-sm"
+                title="Remover membro"
+                data-bs-toggle="modal"
+                data-bs-target="#deleteMemberModal{{ member.id }}"
               >
-                <button
-                  type="submit"
-                  class="btn btn-danger btn-sm"
-                  title="Remover membro"
-                >
-                  <i class="fas fa-trash"></i>
-                </button>
-              </form>
+                <i class="fas fa-trash"></i>
+              </button>
               {% endif %} {% endif %} {% if member.id == session.get('user_id')
               %}
               <a
@@ -127,6 +122,59 @@ block content %}
             {% endif %} {% endif %}
           </td>
         </tr>
+        <!-- Modal de Exclusão de Membro -->
+        <div
+          class="modal fade"
+          id="deleteMemberModal{{ member.id }}"
+          tabindex="-1"
+        >
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title">
+                  <i class="fas fa-exclamation-triangle text-danger me-2"></i>
+                  Confirmar Remoção
+                </h5>
+                <button
+                  type="button"
+                  class="btn-close"
+                  data-bs-dismiss="modal"
+                ></button>
+              </div>
+              <div class="modal-body">
+                <p>
+                  Tem certeza que deseja remover
+                  <strong>{{ member.nome }}</strong> da família?
+                </p>
+                <p class="text-danger mb-0">
+                  <i class="fas fa-info-circle me-2"></i>
+                  Esta ação não pode ser desfeita e o membro perderá acesso ao
+                  sistema.
+                </p>
+              </div>
+              <div class="modal-footer">
+                <button
+                  type="button"
+                  class="btn btn-secondary"
+                  data-bs-dismiss="modal"
+                >
+                  <i class="fas fa-times me-2"></i>
+                  Cancelar
+                </button>
+                <form
+                  method="POST"
+                  action="{{ url_for('familia.delete_member', id=member.id) }}"
+                  class="d-inline"
+                >
+                  <button type="submit" class="btn btn-danger">
+                    <i class="fas fa-trash me-2"></i>
+                    Remover Membro
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
         {% endfor %}
       </tbody>
     </table>

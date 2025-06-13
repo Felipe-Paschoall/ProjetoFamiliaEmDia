@@ -101,6 +101,11 @@
                     <i class="fas fa-edit"></i>
                   </a>
                   {% endif %}
+                  {% if session.get('is_admin') %}
+                  <button type="button" class="btn btn-danger" title="Excluir tarefa" data-bs-toggle="modal" data-bs-target="#deleteModal{{ tarefa.id }}">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                  {% endif %}
                   {% if (tarefa.status == 'aprovada' or tarefa.status == 'atrasada') and tarefa.destinatario_id == session.get('user_id') %}
                   <button type="button" class="btn btn-success" title="Marcar como concluída" data-bs-toggle="modal"
                     data-bs-target="#completeModal{{ tarefa.id }}">
@@ -111,6 +116,42 @@
                     <i class="fas fa-times"></i>
                   </button>
                   {% endif %}
+
+               
+                </div>
+
+                <!-- Modal de Exclusão -->
+                <div class="modal fade" id="deleteModal{{ tarefa.id }}" tabindex="-1">
+                  <div class="modal-dialog">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h5 class="modal-title">
+                          <i class="fas fa-exclamation-triangle text-danger me-2"></i>
+                          Confirmar Exclusão
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                      </div>
+                      <div class="modal-body">
+                        <p>Tem certeza que deseja excluir a tarefa <strong>"{{ tarefa.titulo }}"</strong>?</p>
+                        <p class="text-danger mb-0">
+                          <i class="fas fa-info-circle me-2"></i>
+                          Esta ação não pode ser desfeita.
+                        </p>
+                      </div>
+                      <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                          <i class="fas fa-times me-2"></i>
+                          Cancelar
+                        </button>
+                        <form method="POST" action="{{ url_for('tarefas.delete_task', id=tarefa.id) }}" class="d-inline">
+                          <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-trash me-2"></i>
+                            Excluir Tarefa
+                          </button>
+                        </form>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </td>
             </tr>
